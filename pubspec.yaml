@@ -41,6 +41,11 @@ dependencies:
   # Utilities
   flutter_markdown: ^0.6.0
   http: ^1.1.0
+  
+  # DMX/GrandMA 3
+  osc: ^0.2.0                      # OSC Protocol für GrandMA 3
+  mdns_dart: ^1.0.0                # mDNS/Bonjour für Auto-Discovery
+  network_info_plus: ^5.0.0        # Netzwerk-Info für Discovery
 
 dev_dependencies:
   flutter_test:
