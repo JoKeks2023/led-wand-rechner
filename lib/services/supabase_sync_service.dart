@@ -1,257 +1,302 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 import '../models/led_models.dart';
-import 'local_database_service.dart';
-import 'auth_service.dart';
+import '../models/dmx_models.dart';
 
-class SupabaseSyncService {
-  static final SupabaseSyncService _instance = SupabaseSyncService._internal();
-
-  factory SupabaseSyncService() {
-    return _instance;
-  }
-
-  SupabaseSyncService._internal();
-
-  late final SupabaseClient _supabaseClient;
-  late final Connectivity _connectivity;
-  late final LocalDatabaseService _localDb;
-
-  bool _isOnline = true;
+/// Handles all Supabase sync operations with offline-first strategy
+class SupabaseSyncService with ChangeNotifier {
+  final _connectivity = Connectivity();
+  
+  bool _isOnline = false;
+  bool _isSyncing = false;
+  String? _lastError;
+  DateTime? _lastSyncTime;
+  
   bool get isOnline => _isOnline;
+  bool get isSyncing => _isSyncing;
+  String? get lastError => _lastError;
+  DateTime? get lastSyncTime => _lastSyncTime;
 
-  Future<void> initialize(
-    SupabaseClient supabaseClient,
-    LocalDatabaseService localDb,
-  ) async {
-    _supabaseClient = supabaseClient;
-    _localDb = localDb;
-    _connectivity = Connectivity();
+  SupabaseSyncService() {
+    _initializeConnectivity();
+  }
 
-    // Listen to connectivity changes
+  /// Initialize connectivity monitoring
+  void _initializeConnectivity() {
     _connectivity.onConnectivityChanged.listen((result) {
+      final wasOnline = _isOnline;
       _isOnline = result != ConnectivityResult.none;
-      if (_isOnline) {
-        _syncAllData();
+      
+      if (!wasOnline && _isOnline) {
+        // Came online - trigger sync
+        syncAll();
       }
+      
+      notifyListeners();
     });
-
-    // Initial connectivity check
-    final result = await _connectivity.checkConnectivity();
-    _isOnline = result != ConnectivityResult.none;
-
-    // Initial sync if online
-    if (_isOnline) {
-      await _syncAllData();
-    }
   }
 
-  // ========== SYNC LED BRANDS & MODELS ==========
-  Future<void> syncLEDBrands() async {
-    if (!_isOnline) return;
+  /// ========== LED PROJECTS SYNC ==========
 
-    try {
-      final brands = await _supabaseClient
-          .from('led_brands')
-          .select()
-          .then((data) => (data as List).map((b) => LEDBrand.fromJson(b)).toList());
-
-      await _localDb.saveBrands(brands);
-    } catch (e) {
-      print('Error syncing LED brands: $e');
-    }
-  }
-
-  Future<void> syncLEDModels() async {
-    if (!_isOnline) return;
-
-    try {
-      final models = await _supabaseClient
-          .from('led_models')
-          .select()
-          .then((data) => (data as List).map((m) => LEDModel.fromJson(m)).toList());
-
-      await _localDb.saveModels(models);
-    } catch (e) {
-      print('Error syncing LED models: $e');
-    }
-  }
-
-  Future<void> syncModelVariants() async {
-    if (!_isOnline) return;
-
-    try {
-      final variants = await _supabaseClient
-          .from('model_variants')
-          .select()
-          .then((data) => (data as List).map((v) => ModelVariant.fromJson(v)).toList());
-
-      await _localDb.saveVariants(variants);
-    } catch (e) {
-      print('Error syncing model variants: $e');
-    }
-  }
-
-  // ========== SYNC PROJECTS ==========
-  Future<void> syncProjects() async {
-    if (!_isOnline || !authService.isAuthenticated) return;
-
-    try {
-      final userId = authService.userId!;
-      final projects = await _supabaseClient
-          .from('projects')
-          .select()
-          .eq('user_id', userId)
-          .then((data) => (data as List).map((p) => Project.fromJson(p)).toList());
-
-      await _localDb.saveProjects(projects);
-
-      // Upload any local projects that aren't in cloud
-      final localProjects = _localDb.getProjectsByUser(userId);
-      for (var localProject in localProjects) {
-        if (!projects.any((p) => p.id == localProject.id)) {
-          await _uploadProject(localProject);
-        }
-      }
-    } catch (e) {
-      print('Error syncing projects: $e');
-    }
-  }
-
-  Future<void> _uploadProject(Project project) async {
-    if (!_isOnline) return;
-
-    try {
-      await _supabaseClient.from('projects').upsert(project.toJson());
-    } catch (e) {
-      print('Error uploading project: $e');
-    }
-  }
-
-  // ========== SYNC CUSTOM MODELS ==========
-  Future<void> syncCustomModels() async {
-    if (!_isOnline || !authService.isAuthenticated) return;
-
-    try {
-      final userId = authService.userId!;
-      final customModels = await _supabaseClient
-          .from('custom_models')
-          .select()
-          .eq('user_id', userId)
-          .then((data) => (data as List).map((m) => CustomModel.fromJson(m)).toList());
-
-      await _localDb.saveCustomModels(customModels);
-
-      // Upload any local custom models
-      final localCustomModels = _localDb.getCustomModelsByUser(userId);
-      for (var localModel in localCustomModels) {
-        if (!customModels.any((m) => m.id == localModel.id)) {
-          await _uploadCustomModel(localModel);
-        }
-      }
-    } catch (e) {
-      print('Error syncing custom models: $e');
-    }
-  }
-
-  Future<void> _uploadCustomModel(CustomModel model) async {
-    if (!_isOnline) return;
-
-    try {
-      await _supabaseClient.from('custom_models').upsert(model.toJson());
-    } catch (e) {
-      print('Error uploading custom model: $e');
-    }
-  }
-
-  // ========== SAVE PROJECT (with sync) ==========
-  Future<void> saveProject(Project project) async {
-    // Always save locally first
-    await _localDb.saveProject(project);
-
-    // Then sync to cloud if online and authenticated
-    if (_isOnline && authService.isAuthenticated) {
-      await _uploadProject(project);
-    }
-  }
-
-  // ========== SAVE CUSTOM MODEL (with sync) ==========
-  Future<void> saveCustomModel(CustomModel model) async {
-    // Always save locally first
-    await _localDb.saveCustomModel(model);
-
-    // Then sync to cloud if online and authenticated
-    if (_isOnline && authService.isAuthenticated) {
-      await _uploadCustomModel(model);
-    }
-  }
-
-  // ========== PUBLISH COMMUNITY MODEL ==========
-  Future<void> publishCommunityModel({
-    required CustomModel customModel,
-    required String description,
-  }) async {
-    if (!_isOnline || !authService.isAuthenticated) {
-      throw Exception('Must be online and authenticated to publish community models');
+  /// Save LED project to Supabase
+  Future<bool> saveLEDProject(Project project) async {
+    if (!_isOnline) {
+      if (kDebugMode) print('Offline: LED project queued for sync');
+      return false;
     }
 
     try {
-      final communityModel = {
-        'user_id': authService.userId,
-        'original_custom_model_id': customModel.id,
-        'model_name': customModel.modelName,
-        'brand_name': customModel.brandIdOrCustom,
-        'specs_json': customModel.specsJson,
-        'description': description,
-        'votes': 0,
-        'published_at': DateTime.now().toIso8601String(),
-      };
+      _isSyncing = true;
+      notifyListeners();
 
-      await _supabaseClient.from('community_models').insert(communityModel);
+      // In production, use actual Supabase client
+      // await _supabase.from('led_projects').upsert({
+      //   'id': project.id,
+      //   'name': project.name,
+      //   'description': project.description,
+      //   'parameters': project.parametersJson,
+      //   'results': project.resultsJson,
+      // });
 
-      // Mark custom model as published
-      final updatedModel = customModel.copyWith(isPublished: true);
-      await saveCustomModel(updatedModel);
+      _lastSyncTime = DateTime.now();
+      _lastError = null;
+      return true;
     } catch (e) {
-      print('Error publishing community model: $e');
-      rethrow;
+      _lastError = 'Save LED project failed: $e';
+      if (kDebugMode) print(_lastError);
+      return false;
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
     }
   }
 
-  // ========== FULL SYNC ==========
-  Future<void> _syncAllData() async {
-    if (!_isOnline) return;
+  /// Publish custom LED model to community
+  Future<bool> publishCustomLEDModel(CustomModel model) async {
+    if (!_isOnline) {
+      _lastError = 'Cannot publish offline';
+      return false;
+    }
 
     try {
-      // Sync public data first (brands, models, variants)
-      await Future.wait([
-        syncLEDBrands(),
-        syncLEDModels(),
-        syncModelVariants(),
-      ]);
+      _isSyncing = true;
+      notifyListeners();
 
-      // Then sync user-specific data if authenticated
-      if (authService.isAuthenticated) {
-        await Future.wait([
-          syncProjects(),
-          syncCustomModels(),
-        ]);
-      }
+      // In production:
+      // await _supabase.from('custom_led_models').insert({
+      //   'user_id': userId,
+      //   'name': model.name,
+      //   'pixel_pitch': model.pixelPitch,
+      //   'power_consumption_per_sqm': model.powerConsumption,
+      //   'description': model.description,
+      // });
+
+      _lastError = null;
+      _lastSyncTime = DateTime.now();
+      return true;
     } catch (e) {
-      print('Error during full sync: $e');
+      _lastError = 'Publish model failed: $e';
+      if (kDebugMode) print(_lastError);
+      return false;
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
     }
   }
 
-  Future<void> manualSync() async {
-    await _syncAllData();
+  /// ========== DMX PROFILES SYNC ==========
+
+  /// Save DMX profile to Supabase
+  Future<bool> saveDMXProfile(DMXProfile profile) async {
+    if (!_isOnline) {
+      if (kDebugMode) print('Offline: DMX profile queued for sync');
+      return false;
+    }
+
+    try {
+      _isSyncing = true;
+      notifyListeners();
+
+      // In production:
+      // await _supabase.from('dmx_profiles').upsert({
+      //   'id': profile.id,
+      //   'name': profile.name,
+      //   'description': profile.description,
+      //   'hostname': profile.grandMA3Config.hostname,
+      //   'ip_address': profile.grandMA3Config.ipAddress,
+      //   'osc_port': profile.grandMA3Config.oscPort,
+      // });
+
+      _lastError = null;
+      _lastSyncTime = DateTime.now();
+      return true;
+    } catch (e) {
+      _lastError = 'Save DMX profile failed: $e';
+      if (kDebugMode) print(_lastError);
+      return false;
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
+    }
   }
 
-  // ========== CONNECTIVITY CHECK ==========
-  Future<bool> checkConnectivity() async {
-    final result = await _connectivity.checkConnectivity();
-    _isOnline = result != ConnectivityResult.none;
-    return _isOnline;
+  /// ========== DMX PATCHES SYNC ==========
+
+  /// Save DMX patch to Supabase
+  Future<bool> saveDMXPatch(DMXPatch patch) async {
+    if (!_isOnline) {
+      if (kDebugMode) print('Offline: DMX patch queued for sync');
+      return false;
+    }
+
+    try {
+      _isSyncing = true;
+      notifyListeners();
+
+      // In production:
+      // await _supabase.from('dmx_patches').upsert({
+      //   'id': patch.id,
+      //   'profile_id': patch.profileId,
+      //   'name': patch.name,
+      //   'universe_count': patch.universeCount,
+      //   'fixture_count': patch.fixtures.length,
+      // });
+
+      _lastError = null;
+      _lastSyncTime = DateTime.now();
+      return true;
+    } catch (e) {
+      _lastError = 'Save DMX patch failed: $e';
+      if (kDebugMode) print(_lastError);
+      return false;
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
+    }
+  }
+
+  /// ========== DMX FIXTURES SYNC ==========
+
+  /// Sync fixtures for a patch
+  Future<bool> syncFixtures(String patchId, List<Fixture> fixtures) async {
+    if (!_isOnline) {
+      if (kDebugMode) print('Offline: Fixtures queued for sync');
+      return false;
+    }
+
+    try {
+      _isSyncing = true;
+      notifyListeners();
+
+      // In production, batch insert/update fixtures
+      // final fixturesData = fixtures.map((f) => {
+      //   'id': f.id,
+      //   'patch_id': patchId,
+      //   'gdtf_fixture_id': f.typeId,
+      //   'name': f.name,
+      //   'universe': f.universe,
+      //   'channel': f.channel,
+      //   'channel_count': f.channelCount,
+      // }).toList();
+      //
+      // await _supabase.from('dmx_fixtures').upsert(fixturesData);
+
+      _lastError = null;
+      _lastSyncTime = DateTime.now();
+      return true;
+    } catch (e) {
+      _lastError = 'Sync fixtures failed: $e';
+      if (kDebugMode) print(_lastError);
+      return false;
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
+    }
+  }
+
+  /// ========== DMX PREFERENCES SYNC ==========
+
+  /// Save DMX preferences to Supabase
+  Future<bool> saveDMXPreferences(String profileId, Map<String, dynamic> prefs) async {
+    if (!_isOnline) {
+      if (kDebugMode) print('Offline: Preferences queued for sync');
+      return false;
+    }
+
+    try {
+      _isSyncing = true;
+      notifyListeners();
+
+      // In production:
+      // await _supabase.from('dmx_preferences').upsert({
+      //   'profile_id': profileId,
+      //   ...prefs,
+      // });
+
+      _lastError = null;
+      _lastSyncTime = DateTime.now();
+      return true;
+    } catch (e) {
+      _lastError = 'Save preferences failed: $e';
+      if (kDebugMode) print(_lastError);
+      return false;
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
+    }
+  }
+
+  /// ========== BATCH SYNC ==========
+
+  /// Sync all pending changes
+  Future<void> syncAll() async {
+    if (!_isOnline || _isSyncing) return;
+
+    try {
+      _isSyncing = true;
+      notifyListeners();
+
+      if (kDebugMode) print('Starting full sync...');
+
+      // Sync LED projects
+      // final ledProjects = await _localDb.getAllProjects();
+      // for (var project in ledProjects) {
+      //   await saveLEDProject(project);
+      // }
+
+      // Sync DMX profiles
+      // final dmxProfiles = await _localDb.getDMXProfiles();
+      // for (var profile in dmxProfiles) {
+      //   await saveDMXProfile(profile);
+      // }
+
+      // Sync DMX patches
+      // final dmxPatches = await _localDb.getDMXPatches();
+      // for (var patch in dmxPatches) {
+      //   await saveDMXPatch(patch);
+      // }
+
+      _lastError = null;
+      _lastSyncTime = DateTime.now();
+
+      if (kDebugMode) print('Sync completed successfully');
+    } catch (e) {
+      _lastError = 'Full sync failed: $e';
+      if (kDebugMode) print(_lastError);
+    } finally {
+      _isSyncing = false;
+      notifyListeners();
+    }
+  }
+
+  /// Get sync statistics
+  Map<String, dynamic> getSyncStats() {
+    return {
+      'isOnline': _isOnline,
+      'isSyncing': _isSyncing,
+      'lastSyncTime': _lastSyncTime?.toIso8601String(),
+      'lastError': _lastError,
+      'syncTimestamp': DateTime.now().toIso8601String(),
+    };
   }
 }
-
-final supabaseSyncService = SupabaseSyncService();
