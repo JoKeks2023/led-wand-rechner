@@ -1,0 +1,126 @@
+{
+  "app_title": "LED Wand Rechner",
+  "app_subtitle": "Professioneller LED-Wandrechner",
+  
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "new": "Neu",
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "warning": "Warnung",
+    "logout": "Abmelden",
+    "login": "Anmelden"
+  },
+  
+  "projects": {
+    "title": "Projekte",
+    "new_project": "Neues Projekt",
+    "project_name": "Projektname",
+    "description": "Beschreibung",
+    "created_at": "Erstellt am",
+    "updated_at": "Aktualisiert am",
+    "empty_state": "Keine Projekte vorhanden. Erstelle ein neues!",
+    "delete_confirm": "Projekt wirklich löschen?",
+    "rename": "Umbenennen"
+  },
+  
+  "led_params": {
+    "brand": "LED-Marke",
+    "model": "LED-Modell",
+    "variant": "Variante",
+    "width_mm": "Breite (mm)",
+    "height_mm": "Höhe (mm)",
+    "led_distance_mm": "LED-Abstand (mm)",
+    "num_rows": "Anzahl Reihen",
+    "num_columns": "Anzahl Spalten",
+    "pixel_pitch": "Pixeldichte",
+    "color_type": "Farbtyp",
+    "custom_model": "Benutzerdefiniertes Modell",
+    "select_brand": "Wähle eine Marke...",
+    "select_model": "Wähle ein Modell...",
+    "custom_model_dialog_title": "Neues Custom-Modell",
+    "model_name": "Modellname",
+    "pixel_pitch_mm": "Pixel-Pitch (mm)",
+    "wattage_per_led": "Stromverbrauch pro LED (mA)",
+    "price_per_unit": "Preis pro Modul (€)"
+  },
+  
+  "costs": {
+    "title": "Kosten",
+    "module_price": "Modul-Preis (€)",
+    "installation_cost": "Installationskosten (€)",
+    "service_warranty": "Service & Garantie (€)",
+    "shipping_cost": "Versandkosten (€)",
+    "total_cost": "Gesamtkosten (€)"
+  },
+  
+  "results": {
+    "title": "Ergebnisse",
+    "pixel_density": "Pixeldichte (PPI)",
+    "resolution": "Auflösung (Pixel)",
+    "total_width_pixels": "Gesamtbreite (Pixel)",
+    "total_height_pixels": "Gesamthöhe (Pixel)",
+    "total_pixels": "Gesamt-Pixel",
+    "total_area": "Gesamtfläche (m²)",
+    "total_power": "Gesamtleistung (W)",
+    "total_current": "Gesamtstrom (A)",
+    "brightness": "Helligkeit (Lux)",
+    "heat_generation": "Wärmeerzeugung (W)",
+    "material_weight": "Material-Gewicht (kg)",
+    "total_cost": "Gesamtkosten (€)",
+    "calculated_at": "Berechnet am"
+  },
+  
+  "sync": {
+    "status_syncing": "Synchronisiert...",
+    "status_synced": "Synchronisiert",
+    "status_offline": "Offline",
+    "status_not_logged_in": "Nicht angemeldet (nur lokal)"
+  },
+  
+  "auth": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "sign_up": "Registrieren",
+    "sign_in": "Anmelden",
+    "forgot_password": "Passwort vergessen?",
+    "no_account": "Kein Konto? ",
+    "have_account": "Hast du bereits ein Konto? ",
+    "skip": "Überspringen",
+    "login_optional": "Login ist optional. Lokal funktioniert alles auch ohne Konto!"
+  },
+  
+  "community": {
+    "title": "Community-Modelle",
+    "publish": "Veröffentlichen",
+    "publishing": "Wird veröffentlicht...",
+    "publish_confirm": "Dieses Modell als Community-Modell veröffentlichen?",
+    "publish_success": "Modell erfolgreich veröffentlicht!",
+    "votes": "Bewertungen",
+    "published_by": "Veröffentlicht von",
+    "report_abuse": "Missbrauch melden"
+  },
+  
+  "export": {
+    "pdf": "Als PDF exportieren",
+    "csv": "Als CSV exportieren",
+    "export_success": "Export erfolgreich!",
+    "export_error": "Export fehlgeschlagen"
+  },
+  
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "theme": "Design",
+    "dark_mode": "Dunkelmodus",
+    "about": "Über diese App"
+  }
+}

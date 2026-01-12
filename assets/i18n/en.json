@@ -1,0 +1,126 @@
+{
+  "app_title": "LED Wall Calculator",
+  "app_subtitle": "Professional LED Wall Calculator",
+  
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "new": "New",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "logout": "Logout",
+    "login": "Login"
+  },
+  
+  "projects": {
+    "title": "Projects",
+    "new_project": "New Project",
+    "project_name": "Project Name",
+    "description": "Description",
+    "created_at": "Created at",
+    "updated_at": "Updated at",
+    "empty_state": "No projects yet. Create a new one!",
+    "delete_confirm": "Really delete this project?",
+    "rename": "Rename"
+  },
+  
+  "led_params": {
+    "brand": "LED Brand",
+    "model": "LED Model",
+    "variant": "Variant",
+    "width_mm": "Width (mm)",
+    "height_mm": "Height (mm)",
+    "led_distance_mm": "LED Distance (mm)",
+    "num_rows": "Number of Rows",
+    "num_columns": "Number of Columns",
+    "pixel_pitch": "Pixel Pitch",
+    "color_type": "Color Type",
+    "custom_model": "Custom Model",
+    "select_brand": "Select a brand...",
+    "select_model": "Select a model...",
+    "custom_model_dialog_title": "New Custom Model",
+    "model_name": "Model Name",
+    "pixel_pitch_mm": "Pixel Pitch (mm)",
+    "wattage_per_led": "Wattage per LED (mA)",
+    "price_per_unit": "Price per Unit (€)"
+  },
+  
+  "costs": {
+    "title": "Costs",
+    "module_price": "Module Price (€)",
+    "installation_cost": "Installation Cost (€)",
+    "service_warranty": "Service & Warranty (€)",
+    "shipping_cost": "Shipping Cost (€)",
+    "total_cost": "Total Cost (€)"
+  },
+  
+  "results": {
+    "title": "Results",
+    "pixel_density": "Pixel Density (PPI)",
+    "resolution": "Resolution (Pixels)",
+    "total_width_pixels": "Total Width (Pixels)",
+    "total_height_pixels": "Total Height (Pixels)",
+    "total_pixels": "Total Pixels",
+    "total_area": "Total Area (m²)",
+    "total_power": "Total Power (W)",
+    "total_current": "Total Current (A)",
+    "brightness": "Brightness (Lux)",
+    "heat_generation": "Heat Generation (W)",
+    "material_weight": "Material Weight (kg)",
+    "total_cost": "Total Cost (€)",
+    "calculated_at": "Calculated at"
+  },
+  
+  "sync": {
+    "status_syncing": "Syncing...",
+    "status_synced": "Synced",
+    "status_offline": "Offline",
+    "status_not_logged_in": "Not logged in (local only)"
+  },
+  
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "sign_up": "Sign Up",
+    "sign_in": "Sign In",
+    "forgot_password": "Forgot password?",
+    "no_account": "No account? ",
+    "have_account": "Already have an account? ",
+    "skip": "Skip",
+    "login_optional": "Login is optional. Everything works locally without an account!"
+  },
+  
+  "community": {
+    "title": "Community Models",
+    "publish": "Publish",
+    "publishing": "Publishing...",
+    "publish_confirm": "Publish this model as a community model?",
+    "publish_success": "Model published successfully!",
+    "votes": "Votes",
+    "published_by": "Published by",
+    "report_abuse": "Report Abuse"
+  },
+  
+  "export": {
+    "pdf": "Export as PDF",
+    "csv": "Export as CSV",
+    "export_success": "Export successful!",
+    "export_error": "Export failed"
+  },
+  
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "dark_mode": "Dark Mode",
+    "about": "About This App"
+  }
+}

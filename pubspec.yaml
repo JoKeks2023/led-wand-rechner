@@ -1,0 +1,71 @@
+name: led_wand_app
+description: "A cross-platform LED wall calculator app with real-time calculations, multi-project management, and cloud sync via Supabase."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management & Provider
+  provider: ^6.0.0
+  
+  # Supabase & Backend
+  supabase_flutter: ^2.3.0
+  
+  # Local Database & Storage
+  hive: ^2.2.0
+  hive_flutter: ^1.1.0
+  
+  # Connectivity
+  connectivity_plus: ^6.0.0
+  
+  # PDF Export
+  pdf: ^3.10.0
+  printing: ^5.11.0
+  
+  # Localization (i18n)
+  intl: ^0.19.0
+  easy_localization: ^3.0.0
+  
+  # UUID for unique IDs
+  uuid: ^4.0.0
+  
+  # JSON Serialization
+  json_annotation: ^4.8.0
+  
+  # Utilities
+  flutter_markdown: ^0.6.0
+  http: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Build & Code Generation
+  build_runner: ^2.4.0
+  json_serializable: ^6.7.0
+  hive_generator: ^2.0.0
+  
+  # Linting
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/i18n/
+    - assets/data/
+  
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 500
