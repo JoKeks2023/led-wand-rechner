@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/led_models.dart';
 import '../models/dmx_models.dart';
 import '../models/dmx_preferences.dart';
@@ -10,6 +10,466 @@ import '../services/gdtf_service.dart';
 import '../services/grandma3_discovery_service.dart';
 import '../services/grandma3_connection_manager.dart';
 import '../services/dmx_service.dart';
+
+// ============================================================================
+// DEPRECATED - OLD CHANGENOTIFIER PROVIDERS - REPLACED WITH RIVERPOD
+// ============================================================================
+// The following code is kept for reference but replaced with Riverpod
+// implementation below. This ensures modern state management.
+
+// ============================================================================
+// SERVICE PROVIDERS
+// ============================================================================
+
+final localDatabaseServiceProvider = Provider((ref) {
+  return LocalDatabaseService();
+});
+
+final authServiceProvider = Provider((ref) {
+  return AuthService();
+});
+
+final ledCalculationServiceProvider = Provider((ref) {
+  return LEDCalculationService();
+});
+
+final dmxServiceProvider = StateProvider((ref) {
+  return DMXService();
+});
+
+// ============================================================================
+// PROJECT MANAGEMENT
+// ============================================================================
+
+/// All projects from local database
+final projectsProvider = FutureProvider<List<Project>>((ref) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  return db.getAllProjects();
+});
+
+/// Add new project
+final addProjectProvider =
+    FutureProvider.family<void, Project>((ref, project) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  await db.saveProject(project);
+  ref.refresh(projectsProvider);
+});
+
+/// Update project
+final updateProjectProvider =
+    FutureProvider.family<void, Project>((ref, project) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  await db.saveProject(project);
+  ref.refresh(projectsProvider);
+});
+
+/// Delete project
+final deleteProjectProvider =
+    FutureProvider.family<void, String>((ref, projectId) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  await db.deleteProject(projectId);
+  ref.refresh(projectsProvider);
+});
+
+/// Get single project
+final getProjectProvider =
+    FutureProvider.family<Project?, String>((ref, projectId) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  return db.getProject(projectId);
+});
+
+/// Currently selected project
+final selectedProjectProvider = StateProvider<String?>((ref) => null);
+
+// ============================================================================
+// LED BRANDS & MODELS
+// ============================================================================
+
+/// All LED brands
+final ledBrandsProvider = FutureProvider<List<LEDBrand>>((ref) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  return db.getAllBrands();
+});
+
+/// Models for specific brand
+final ledModelsForBrandProvider =
+    FutureProvider.family<List<LEDModel>, String>((ref, brandId) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  return db.getModelsForBrand(brandId);
+});
+
+/// Get specific LED model
+final ledModelProvider =
+    FutureProvider.family<LEDModel?, String>((ref, modelId) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  return db.getModel(modelId);
+});
+
+/// Add custom LED model
+final addCustomModelProvider =
+    FutureProvider.family<void, LEDModel>((ref, model) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  await db.saveCustomModel(model);
+  ref.refresh(ledBrandsProvider);
+});
+
+/// Currently selected brand
+final selectedBrandProvider = StateProvider<LEDBrand?>((ref) => null);
+
+/// Currently selected model
+final selectedModelProvider = StateProvider<LEDModel?>((ref) => null);
+
+// ============================================================================
+// LED CALCULATION
+// ============================================================================
+
+/// Width in millimeters
+final ledWidthMmProvider = StateProvider<double>((ref) => 1000.0);
+
+/// Height in millimeters
+final ledHeightMmProvider = StateProvider<double>((ref) => 1000.0);
+
+/// Estimated unit cost in EUR
+final unitCostEurProvider = StateProvider<double>((ref) => 100.0);
+
+/// LED Calculation Results
+final calculationResultsProvider = Provider<LEDCalculationResults>((ref) {
+  final widthMm = ref.watch(ledWidthMmProvider);
+  final heightMm = ref.watch(ledHeightMmProvider);
+  final model = ref.watch(selectedModelProvider);
+  final unitCost = ref.watch(unitCostEurProvider);
+
+  if (model == null) {
+    return LEDCalculationResults(
+      totalPixels: 0,
+      widthPixels: 0,
+      heightPixels: 0,
+      estimatedCostEur: 0,
+      estimatedPowerWatts: 0,
+      pixelPitchMm: 0,
+      coverage: 0,
+    );
+  }
+
+  final service = ref.watch(ledCalculationServiceProvider);
+  return service.calculate(
+    widthMm: widthMm,
+    heightMm: heightMm,
+    pixelPitchMm: model.pixelPitchMm,
+    wattagePerPixelMa: model.wattagePerLedMa,
+    unitCostEur: unitCost,
+  );
+});
+
+/// Export calculation as JSON
+final exportCalculationProvider = Provider<Map<String, dynamic>>((ref) {
+  final results = ref.watch(calculationResultsProvider);
+  final brand = ref.watch(selectedBrandProvider);
+  final model = ref.watch(selectedModelProvider);
+  final widthMm = ref.watch(ledWidthMmProvider);
+  final heightMm = ref.watch(ledHeightMmProvider);
+
+  return {
+    'timestamp': DateTime.now().toIso8601String(),
+    'brand': brand?.name ?? 'Unknown',
+    'model': model?.modelName ?? 'Unknown',
+    'dimensions': {'width_mm': widthMm, 'height_mm': heightMm},
+    'results': {
+      'total_pixels': results.totalPixels,
+      'width_pixels': results.widthPixels,
+      'height_pixels': results.heightPixels,
+      'estimated_cost_eur': results.estimatedCostEur,
+      'estimated_power_watts': results.estimatedPowerWatts,
+      'pixel_pitch_mm': results.pixelPitchMm,
+    },
+  };
+});
+
+// ============================================================================
+// AUTHENTICATION
+// ============================================================================
+
+enum AuthStatus { initial, authenticated, unauthenticated, error }
+
+class AuthState {
+  final AuthStatus status;
+  final String? userId;
+  final String? email;
+  final String? errorMessage;
+
+  AuthState({
+    required this.status,
+    this.userId,
+    this.email,
+    this.errorMessage,
+  });
+
+  AuthState copyWith({
+    AuthStatus? status,
+    String? userId,
+    String? email,
+    String? errorMessage,
+  }) {
+    return AuthState(
+      status: status ?? this.status,
+      userId: userId ?? this.userId,
+      email: email ?? this.email,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+}
+
+/// Current authentication state
+final authStateProvider = StateProvider<AuthState>((ref) {
+  return AuthState(status: AuthStatus.initial);
+});
+
+/// Sign in with email/password
+final signInProvider =
+    FutureProvider.family<void, (String, String)>((ref, credentials) async {
+  final (email, password) = credentials;
+  ref.state = AuthState(status: AuthStatus.initial);
+
+  try {
+    final auth = ref.watch(authServiceProvider);
+    await auth.signIn(email: email, password: password);
+    ref.state = AuthState(
+      status: AuthStatus.authenticated,
+      email: email,
+    );
+  } catch (e) {
+    ref.state = AuthState(
+      status: AuthStatus.error,
+      errorMessage: e.toString(),
+    );
+  }
+});
+
+/// Sign up new user
+final signUpProvider =
+    FutureProvider.family<void, (String, String)>((ref, credentials) async {
+  final (email, password) = credentials;
+  ref.state = AuthState(status: AuthStatus.initial);
+
+  try {
+    final auth = ref.watch(authServiceProvider);
+    await auth.signUp(email: email, password: password);
+    ref.state = AuthState(
+      status: AuthStatus.authenticated,
+      email: email,
+    );
+  } catch (e) {
+    ref.state = AuthState(
+      status: AuthStatus.error,
+      errorMessage: e.toString(),
+    );
+  }
+});
+
+/// Sign out
+final signOutProvider = FutureProvider<void>((ref) async {
+  try {
+    final auth = ref.watch(authServiceProvider);
+    await auth.signOut();
+    ref.state = AuthState(status: AuthStatus.unauthenticated);
+  } catch (e) {
+    ref.state = AuthState(
+      status: AuthStatus.error,
+      errorMessage: e.toString(),
+    );
+  }
+});
+
+// ============================================================================
+// DMX PROFILES
+// ============================================================================
+
+/// All DMX profiles
+final dmxProfilesProvider =
+    FutureProvider<Map<String, DMXProfile>>((ref) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  return db.getAllDMXProfiles();
+});
+
+/// Add or update DMX profile
+final addDMXProfileProvider =
+    FutureProvider.family<void, DMXProfile>((ref, profile) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  await db.saveDMXProfile(profile);
+  ref.refresh(dmxProfilesProvider);
+});
+
+/// Delete DMX profile
+final deleteDMXProfileProvider =
+    FutureProvider.family<void, String>((ref, profileId) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  await db.deleteDMXProfile(profileId);
+  ref.refresh(dmxProfilesProvider);
+});
+
+/// Get specific DMX profile
+final getDMXProfileProvider =
+    FutureProvider.family<DMXProfile?, String>((ref, profileId) async {
+  final db = ref.watch(localDatabaseServiceProvider);
+  return db.getDMXProfile(profileId);
+});
+
+/// Currently selected DMX profile
+final selectedDMXProfileProvider = StateProvider<String?>((ref) => null);
+
+// ============================================================================
+// DMX UNIVERSES & FIXTURES
+// ============================================================================
+
+/// Current DMX universes state
+final dmxUniversesProvider = StateProvider<Map<int, DMXUniverse>>((ref) {
+  return {};
+});
+
+/// Add fixture to DMX universe
+final addFixtureToDMXProvider =
+    FutureProvider.family<void, (int, Fixture)>((ref, data) async {
+  final (universeId, fixture) = data;
+  final service = ref.watch(dmxServiceProvider);
+  service.addFixture(universeId, fixture);
+  ref.refresh(dmxUniversesProvider);
+});
+
+/// Remove fixture from DMX universe
+final removeFixtureFromDMXProvider =
+    FutureProvider.family<void, (int, String)>((ref, data) async {
+  final (universeId, fixtureId) = data;
+  final service = ref.watch(dmxServiceProvider);
+  service.removeFixture(universeId, fixtureId);
+  ref.refresh(dmxUniversesProvider);
+});
+
+/// Get DMX load for universe (0-100%)
+final dmxLoadProvider = Provider.family<double, int>((ref, universeId) {
+  final universes = ref.watch(dmxUniversesProvider);
+  final universe = universes[universeId];
+  if (universe == null) return 0.0;
+  return (universe.usedChannels / 512) * 100;
+});
+
+// ============================================================================
+// GRANDMA3 CONNECTION
+// ============================================================================
+
+enum ConnectionStatus { disconnected, connecting, connected, error }
+
+class GrandMA3ConnectionState {
+  final ConnectionStatus status;
+  final String? errorMessage;
+  final String? connectedConsoleIP;
+
+  GrandMA3ConnectionState({
+    required this.status,
+    this.errorMessage,
+    this.connectedConsoleIP,
+  });
+
+  GrandMA3ConnectionState copyWith({
+    ConnectionStatus? status,
+    String? errorMessage,
+    String? connectedConsoleIP,
+  }) {
+    return GrandMA3ConnectionState(
+      status: status ?? this.status,
+      errorMessage: errorMessage ?? this.errorMessage,
+      connectedConsoleIP: connectedConsoleIP ?? this.connectedConsoleIP,
+    );
+  }
+}
+
+/// GrandMA3 connection state
+final grandMA3ConnectionProvider =
+    StateProvider<GrandMA3ConnectionState>((ref) {
+  return GrandMA3ConnectionState(status: ConnectionStatus.disconnected);
+});
+
+/// Connect to GrandMA3 console
+final connectToGrandMA3Provider =
+    FutureProvider.family<void, (String, int)>((ref, config) async {
+  final (ip, port) = config;
+  final notifier = ref.watch(grandMA3ConnectionProvider.notifier);
+
+  notifier.state = GrandMA3ConnectionState(status: ConnectionStatus.connecting);
+
+  try {
+    // TODO: Implement actual connection logic
+    await Future.delayed(const Duration(seconds: 2));
+
+    notifier.state = GrandMA3ConnectionState(
+      status: ConnectionStatus.connected,
+      connectedConsoleIP: ip,
+    );
+  } catch (e) {
+    notifier.state = GrandMA3ConnectionState(
+      status: ConnectionStatus.error,
+      errorMessage: e.toString(),
+    );
+  }
+});
+
+/// Disconnect from GrandMA3
+final disconnectFromGrandMA3Provider = FutureProvider<void>((ref) async {
+  final notifier = ref.watch(grandMA3ConnectionProvider.notifier);
+  notifier.state =
+      GrandMA3ConnectionState(status: ConnectionStatus.disconnected);
+});
+
+// ============================================================================
+// DMX PREFERENCES
+// ============================================================================
+
+/// DMX user preferences
+final dmxPreferencesProvider = StateProvider<DMXPreferences>((ref) {
+  return DMXPreferences(
+    connection: ConnectionSettings(
+      consoleIp: '192.168.1.100',
+      port: 10024,
+      connectionTimeoutSeconds: 5,
+    ),
+    patching: PatchingSettings(
+      defaultUniverse: 1,
+      autoAddressFixtures: true,
+    ),
+    stage: StageSettings(
+      stageWidthMeters: 10.0,
+      stageHeightMeters: 5.0,
+      gridSpacingCm: 50,
+    ),
+    export: ExportSettings(
+      format: 'OSC',
+      autoExport: false,
+    ),
+    performance: PerformanceSettings(
+      targetFps: 50,
+      maxMemoryMb: 512,
+    ),
+  );
+});
+
+// ============================================================================
+// UI PREFERENCES
+// ============================================================================
+
+/// Theme mode (light/dark/system)
+final themeModeProvider = StateProvider<String>((ref) => 'system');
+
+/// Current language
+final currentLanguageProvider = StateProvider<String>((ref) => 'de');
+
+/// Toggle between languages
+final toggleLanguageProvider = FutureProvider<void>((ref) async {
+  final current = ref.watch(currentLanguageProvider).state;
+  ref.watch(currentLanguageProvider).state = current == 'de' ? 'en' : 'de';
+});
+
+// ============================================================================
+// DEPRECATED OLD CHANGENOTIFIER CODE (REPLACED ABOVE)
+// ============================================================================
 
 class ProjectsProvider extends ChangeNotifier {
   final LocalDatabaseService _localDb = LocalDatabaseService();
@@ -371,14 +831,15 @@ class ConnectivityProvider extends ChangeNotifier {
 
 class DMXProfilesProvider extends ChangeNotifier {
   final LocalDatabaseService _localDb = LocalDatabaseService();
-  
+
   Map<String, DMXProfile> _profiles = {};
   String? _currentProfileId;
   bool _isLoading = false;
   String? _error;
 
   Map<String, DMXProfile> get profiles => _profiles;
-  DMXProfile? get currentProfile => _currentProfileId != null ? _profiles[_currentProfileId] : null;
+  DMXProfile? get currentProfile =>
+      _currentProfileId != null ? _profiles[_currentProfileId] : null;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -422,7 +883,7 @@ class DMXProfilesProvider extends ChangeNotifier {
 
 class DMXServiceProvider extends ChangeNotifier {
   final DMXService _dmxService = DMXService();
-  
+
   DMXService get service => _dmxService;
 
   List<DMXPatch> getPatches(String profileId) {
@@ -445,7 +906,7 @@ class DMXServiceProvider extends ChangeNotifier {
       fixtureType: fixtureType,
       customName: customName,
     );
-    
+
     if (success) {
       notifyListeners();
     }
@@ -459,7 +920,7 @@ class DMXServiceProvider extends ChangeNotifier {
 
 class GDTFServiceProvider extends ChangeNotifier {
   final GDTFService _gdtfService = GDTFService();
-  
+
   GDTFService get service => _gdtfService;
 
   List<GDTFFixture> get fixtures => _gdtfService.fixtures;
@@ -486,10 +947,11 @@ class GDTFServiceProvider extends ChangeNotifier {
 
 class GrandMA3DiscoveryProvider extends ChangeNotifier {
   final GrandMA3DiscoveryService _discoveryService = GrandMA3DiscoveryService();
-  
+
   GrandMA3DiscoveryService get service => _discoveryService;
 
-  List<DiscoveredConsole> get discoveredConsoles => _discoveryService.discoveredConsoles;
+  List<DiscoveredConsole> get discoveredConsoles =>
+      _discoveryService.discoveredConsoles;
   bool get isDiscovering => _discoveryService.isDiscovering;
   String? get lastError => _discoveryService.lastError;
 
@@ -506,7 +968,7 @@ class GrandMA3DiscoveryProvider extends ChangeNotifier {
 
 class GrandMA3ConnectionProvider extends ChangeNotifier {
   GrandMA3ConnectionManager? _connectionManager;
-  
+
   GrandMA3ConnectionManager? get connectionManager => _connectionManager;
   bool get isConnected => _connectionManager?.isConnected ?? false;
   String? get lastError => _connectionManager?.lastError;

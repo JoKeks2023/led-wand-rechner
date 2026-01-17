@@ -1,8 +1,57 @@
 import 'dart:math';
 import '../models/led_models.dart';
 
+/// Results from LED wall calculation
+class LEDCalculationResults {
+  final int totalPixels;
+  final int widthPixels;
+  final int heightPixels;
+  final double estimatedCostEur;
+  final double estimatedPowerWatts;
+  final double pixelPitchMm;
+  final double coverage; // In square meters
+  final double widthMeters;
+  final double heightMeters;
+  final double pixelsPerSqMeter;
+  final double powerPerPixelWatts;
+
+  LEDCalculationResults({
+    required this.totalPixels,
+    required this.widthPixels,
+    required this.heightPixels,
+    required this.estimatedCostEur,
+    required this.estimatedPowerWatts,
+    required this.pixelPitchMm,
+    required this.coverage,
+    double? widthMeters,
+    double? heightMeters,
+    double? pixelsPerSqMeter,
+    double? powerPerPixelWatts,
+  })  : widthMeters = widthMeters ?? 0,
+        heightMeters = heightMeters ?? 0,
+        pixelsPerSqMeter = pixelsPerSqMeter ??
+            (totalPixels > 0 ? totalPixels / max(coverage, 0.01) : 0),
+        powerPerPixelWatts = powerPerPixelWatts ??
+            (totalPixels > 0 ? estimatedPowerWatts / totalPixels : 0);
+
+  Map<String, dynamic> toJson() => {
+        'totalPixels': totalPixels,
+        'widthPixels': widthPixels,
+        'heightPixels': heightPixels,
+        'estimatedCostEur': estimatedCostEur,
+        'estimatedPowerWatts': estimatedPowerWatts,
+        'pixelPitchMm': pixelPitchMm,
+        'coverageSqMeters': coverage,
+        'widthMeters': widthMeters,
+        'heightMeters': heightMeters,
+        'pixelsPerSqMeter': pixelsPerSqMeter,
+        'powerPerPixelWatts': powerPerPixelWatts,
+      };
+}
+
 class LEDCalculationService {
-  static final LEDCalculationService _instance = LEDCalculationService._internal();
+  static final LEDCalculationService _instance =
+      LEDCalculationService._internal();
 
   factory LEDCalculationService() {
     return _instance;
@@ -10,8 +59,77 @@ class LEDCalculationService {
 
   LEDCalculationService._internal();
 
-  /// Berechnet alle LED-Wandparameter basierend auf Inputs
-  LEDCalculationResults calculateAll({
+  /// Main calculation method for LED wall specifications
+  LEDCalculationResults calculate({
+    required double widthMm,
+    required double heightMm,
+    required double pixelPitchMm,
+    required double wattagePerPixelMa,
+    required double unitCostEur,
+  }) {
+    // Ensure positive values
+    widthMm = widthMm.abs();
+    heightMm = heightMm.abs();
+    pixelPitchMm = pixelPitchMm.abs();
+    wattagePerPixelMa = wattagePerPixelMa.abs();
+    unitCostEur = unitCostEur.abs();
+
+    // Handle edge cases
+    if (pixelPitchMm <= 0 || widthMm <= 0 || heightMm <= 0) {
+      return LEDCalculationResults(
+        totalPixels: 0,
+        widthPixels: 0,
+        heightPixels: 0,
+        estimatedCostEur: 0,
+        estimatedPowerWatts: 0,
+        pixelPitchMm: pixelPitchMm,
+        coverage: 0,
+        widthMeters: widthMm / 1000,
+        heightMeters: heightMm / 1000,
+        pixelsPerSqMeter: 0,
+      );
+    }
+
+    // Calculate pixel count
+    final widthPixels = (widthMm / pixelPitchMm).ceil();
+    final heightPixels = (heightMm / pixelPitchMm).ceil();
+    final totalPixels = widthPixels * heightPixels;
+
+    // Calculate physical dimensions in meters
+    final widthMeters = widthMm / 1000;
+    final heightMeters = heightMm / 1000;
+    final coverageSqMeters = widthMeters * heightMeters;
+
+    // Calculate power consumption
+    // wattagePerPixelMa is in mA at 5V, convert to watts: W = (mA * 5V) / 1000
+    const voltageV = 5.0;
+    final powerPerPixelWatts = (wattagePerPixelMa * voltageV) / 1000;
+    final estimatedPowerWatts = totalPixels * powerPerPixelWatts;
+
+    // Calculate cost with efficiency factor
+    const efficiencyFactor = 0.88; // 88% efficiency
+    final estimatedCostEur = (totalPixels * unitCostEur) / efficiencyFactor;
+
+    // Pixels per square meter
+    final pixelsPerSqMeter = coverageSqMeters > 0 ? totalPixels / coverageSqMeters : 0;
+
+    return LEDCalculationResults(
+      totalPixels: totalPixels,
+      widthPixels: widthPixels,
+      heightPixels: heightPixels,
+      estimatedCostEur: estimatedCostEur,
+      estimatedPowerWatts: estimatedPowerWatts,
+      pixelPitchMm: pixelPitchMm,
+      coverage: coverageSqMeters,
+      widthMeters: widthMeters,
+      heightMeters: heightMeters,
+      pixelsPerSqMeter: pixelsPerSqMeter,
+      powerPerPixelWatts: powerPerPixelWatts,
+    );
+  }
+
+  /// DEPRECATED: Old methods below - kept for reference
+
     required double widthMm,
     required double heightMm,
     required double pixelPitchMm,
@@ -27,14 +145,16 @@ class LEDCalculationService {
 
     // 2. Gesamtauflösung in Pixeln
     final totalPixelsWidth = calculatePixelsInDimension(widthMm, pixelPitchMm);
-    final totalPixelsHeight = calculatePixelsInDimension(heightMm, pixelPitchMm);
+    final totalPixelsHeight =
+        calculatePixelsInDimension(heightMm, pixelPitchMm);
     final totalPixels = totalPixelsWidth * totalPixelsHeight;
 
     // 3. Gesamtfläche in m²
     final totalAreaM2 = calculateArea(widthMm, heightMm);
 
     // 4. Stromverbrauch
-    final totalCurrentAmps = calculateTotalCurrent(totalPixels, wattagePerLedMa);
+    final totalCurrentAmps =
+        calculateTotalCurrent(totalPixels, wattagePerLedMa);
     final totalPowerWatts = calculateTotalPower(totalCurrentAmps);
 
     // 5. Helligkeit (Lux) - Geschätzter Wert basierend auf LED-Dichte
@@ -48,7 +168,9 @@ class LEDCalculationService {
 
     // 8. Gesamtkosten (€)
     double? totalCostEur;
-    if (modulePriceEur != null && numberOfModules != null && numberOfModules > 0) {
+    if (modulePriceEur != null &&
+        numberOfModules != null &&
+        numberOfModules > 0) {
       totalCostEur = calculateTotalCost(
         modulePriceEur: modulePriceEur,
         numberOfModules: numberOfModules,
@@ -135,7 +257,10 @@ class LEDCalculationService {
     double shippingCost = 0,
   }) {
     final modulesTotalCost = modulePriceEur * numberOfModules;
-    return modulesTotalCost + installationCost + serviceWarrantyCost + shippingCost;
+    return modulesTotalCost +
+        installationCost +
+        serviceWarrantyCost +
+        shippingCost;
   }
 
   /// Berechne Anzahl Module basierend auf Wandgröße und Modulgröße
@@ -181,9 +306,9 @@ class LEDCalculationService {
   double estimateROIMonths(double totalCostEur) {
     const double dailiySavings = 5.0; // € pro Tag
     final monthlySavings = dailiySavings * 30;
-    
+
     if (monthlySavings <= 0) return 0;
-    
+
     return totalCostEur / monthlySavings;
   }
 }

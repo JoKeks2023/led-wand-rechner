@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/app_colors.dart';
-import 'demo_led_calculator_screen.dart';
-import 'demo_dmx_settings_screen.dart';
-import 'demo_dmx_pult_screen.dart';
-import 'demo_stage_visualizer_screen.dart';
+import 'led_calculator_screen.dart';
+import 'dmx_settings_screen.dart';
+import 'dmx_pult_screen.dart';
+import 'stage_visualizer_screen.dart';
 
 class AppNavigationShell extends StatefulWidget {
   const AppNavigationShell({Key? key}) : super(key: key);
@@ -39,25 +40,25 @@ class _AppNavigationShellState extends State<AppNavigationShell> {
               key: _navigatorKeys[0],
               onGenerateRoute: (settings) {
                 return MaterialPageRoute(
-                  builder: (_) => const DemoLEDCalculatorScreen(),
+                  builder: (_) => const LEDCalculatorScreen(),
                 );
               },
             ),
-            // DMX Console
+            // DMX Settings
             Navigator(
               key: _navigatorKeys[1],
               onGenerateRoute: (settings) {
                 return MaterialPageRoute(
-                  builder: (_) => const DemoDMXSettingsScreen(),
+                  builder: (_) => const DMXSettingsScreen(),
                 );
               },
             ),
-            // Stage
+            // Stage Visualizer
             Navigator(
               key: _navigatorKeys[2],
               onGenerateRoute: (settings) {
                 return MaterialPageRoute(
-                  builder: (_) => const DemoStageVisualizerScreen(),
+                  builder: (_) => const StageVisualizerScreen(),
                 );
               },
             ),
