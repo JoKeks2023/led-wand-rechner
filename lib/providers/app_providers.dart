@@ -1,15 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/led_models.dart';
-import '../models/dmx_models.dart';
-import '../models/dmx_preferences.dart';
-import '../services/local_database_service.dart';
-import '../services/supabase_sync_service.dart';
-import '../services/auth_service.dart';
-import '../services/led_calculation_service.dart';
-import '../services/gdtf_service.dart';
-import '../services/grandma3_discovery_service.dart';
-import '../services/grandma3_connection_manager.dart';
-import '../services/dmx_service.dart';
+import 'package:led_wand_app/models/led_models.dart';
+import 'package:led_wand_app/models/dmx_models.dart';
+import 'package:led_wand_app/models/dmx_preferences.dart';
+import 'package:led_wand_app/services/local_database_service.dart';
+import 'package:led_wand_app/services/supabase_sync_service.dart';
+import 'package:led_wand_app/services/auth_service.dart';
+import 'package:led_wand_app/services/led_calculation_service.dart';
+import 'package:led_wand_app/services/gdtf_service.dart';
+import 'package:led_wand_app/services/grandma3_discovery_service.dart';
+import 'package:led_wand_app/services/grandma3_connection_manager.dart';
+import 'package:led_wand_app/services/dmx_service.dart';
 
 // ============================================================================
 // DEPRECATED - OLD CHANGENOTIFIER PROVIDERS - REPLACED WITH RIVERPOD

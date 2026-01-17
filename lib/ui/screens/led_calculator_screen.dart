@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:led_wand_rechner/providers/app_providers.dart';
+import 'package:led_wand_app/providers/app_providers.dart';
 import 'package:intl/intl.dart';
 
 class LEDCalculatorScreen extends ConsumerStatefulWidget {
