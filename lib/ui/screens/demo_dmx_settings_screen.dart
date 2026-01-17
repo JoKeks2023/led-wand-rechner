@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 class DemoDMXSettingsScreen extends StatefulWidget {
-  const DemoDMXSettingsScreen({Key? key}) : super(key: key);
+  const DemoDMXSettingsScreen({super.key});
 
   @override
   State<DemoDMXSettingsScreen> createState() => _DemoDMXSettingsScreenState();

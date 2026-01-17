@@ -28,7 +28,8 @@ class LEDBrand {
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
-  factory LEDBrand.fromJson(Map<String, dynamic> json) => _$LEDBrandFromJson(json);
+  factory LEDBrand.fromJson(Map<String, dynamic> json) =>
+      _$LEDBrandFromJson(json);
   Map<String, dynamic> toJson() => _$LEDBrandToJson(this);
 
   LEDBrand copyWith({
@@ -83,7 +84,8 @@ class LEDModel {
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
-  factory LEDModel.fromJson(Map<String, dynamic> json) => _$LEDModelFromJson(json);
+  factory LEDModel.fromJson(Map<String, dynamic> json) =>
+      _$LEDModelFromJson(json);
   Map<String, dynamic> toJson() => _$LEDModelToJson(this);
 
   LEDModel copyWith({
@@ -131,7 +133,8 @@ class ModelVariant {
   })  : id = id ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now();
 
-  factory ModelVariant.fromJson(Map<String, dynamic> json) => _$ModelVariantFromJson(json);
+  factory ModelVariant.fromJson(Map<String, dynamic> json) =>
+      _$ModelVariantFromJson(json);
   Map<String, dynamic> toJson() => _$ModelVariantToJson(this);
 }
 
@@ -162,7 +165,8 @@ class CustomModel {
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
-  factory CustomModel.fromJson(Map<String, dynamic> json) => _$CustomModelFromJson(json);
+  factory CustomModel.fromJson(Map<String, dynamic> json) =>
+      _$CustomModelFromJson(json);
   Map<String, dynamic> toJson() => _$CustomModelToJson(this);
 
   CustomModel copyWith({
@@ -225,7 +229,8 @@ class Project {
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
-  factory Project.fromJson(Map<String, dynamic> json) => _$ProjectFromJson(json);
+  factory Project.fromJson(Map<String, dynamic> json) =>
+      _$ProjectFromJson(json);
   Map<String, dynamic> toJson() => _$ProjectToJson(this);
 
   Project copyWith({
@@ -259,40 +264,4 @@ class Project {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-}
-
-// LED Calculation Results
-@JsonSerializable()
-class LEDCalculationResults {
-  final double pixelDensityPpi;
-  final int totalPixelsWidth;
-  final int totalPixelsHeight;
-  final int totalPixels;
-  final double totalAreaM2;
-  final double totalPowerWatts;
-  final double totalCurrentAmps;
-  final double? estimatedBrightness; // Lux
-  final double? heatGenerationW;
-  final double? materialWeightKg;
-  final double? totalCostEur;
-  final DateTime calculatedAt;
-
-  LEDCalculationResults({
-    required this.pixelDensityPpi,
-    required this.totalPixelsWidth,
-    required this.totalPixelsHeight,
-    required this.totalPixels,
-    required this.totalAreaM2,
-    required this.totalPowerWatts,
-    required this.totalCurrentAmps,
-    this.estimatedBrightness,
-    this.heatGenerationW,
-    this.materialWeightKg,
-    this.totalCostEur,
-    DateTime? calculatedAt,
-  }) : calculatedAt = calculatedAt ?? DateTime.now();
-
-  factory LEDCalculationResults.fromJson(Map<String, dynamic> json) =>
-      _$LEDCalculationResultsFromJson(json);
-  Map<String, dynamic> toJson() => _$LEDCalculationResultsToJson(this);
 }

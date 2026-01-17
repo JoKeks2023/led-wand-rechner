@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 class DemoDMXPultScreen extends StatefulWidget {
-  const DemoDMXPultScreen({Key? key}) : super(key: key);
+  const DemoDMXPultScreen({super.key});
 
   @override
   State<DemoDMXPultScreen> createState() => _DemoDMXPultScreenState();

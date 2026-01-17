@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 class DemoStageVisualizerScreen extends StatefulWidget {
-  const DemoStageVisualizerScreen({Key? key}) : super(key: key);
+  const DemoStageVisualizerScreen({super.key});
 
   @override
   State<DemoStageVisualizerScreen> createState() =>
@@ -81,10 +81,10 @@ class _DemoStageVisualizerScreenState extends State<DemoStageVisualizerScreen> {
                       height: 40 * _zoomLevel,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primary.withOpacity(0.7),
+                        color: AppColors.primary.withValues(alpha: 0.7),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
+                            color: AppColors.primary.withValues(alpha: 0.3),
                             blurRadius: 12,
                             spreadRadius: 4,
                           ),
@@ -110,10 +110,10 @@ class _DemoStageVisualizerScreenState extends State<DemoStageVisualizerScreen> {
                       height: 40 * _zoomLevel,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.secondary.withOpacity(0.7),
+                        color: AppColors.secondary.withValues(alpha: 0.7),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.secondary.withOpacity(0.3),
+                            color: AppColors.secondary.withValues(alpha: 0.3),
                             blurRadius: 12,
                             spreadRadius: 4,
                           ),

@@ -22,6 +22,91 @@
     ]
   },
 
+  "data_sources": {
+    "fixtures": {
+      "open_fixture_library": {
+        "url": "https://open-fixture-library.org/",
+        "summary": "Community-maintained DMX fixture definitions in JSON with exporters for major lighting software.",
+        "download": "https://open-fixture-library.org/download.ofl",
+        "notes": "Use OFL JSON as canonical source, normalize to internal models (FixtureType/Fixture)."
+      },
+      "gdtf_share": {
+        "url": "https://gdtf-share.com/",
+        "summary": "Official GDTF files by manufacturers. Requires account for downloads.",
+        "notes": "Parse via GDTF service for detailed fixture properties when available."
+      }
+    },
+    "led_panels": {
+      "vendors": [
+        { "name": "ROE Visual", "url": "https://www.roevisual.com/products/led-panels" },
+        { "name": "Absen", "url": "https://www.absen.com/products" },
+        { "name": "Unilumin", "url": "https://www.unilumin.com/products.html" }
+      ],
+      "notes": "Vendor pages provide product families and typical specs. Use manual curation or CSV import to avoid scraping brittleness."
+    }
+  },
+
+  "device_catalog": {
+    "last_update": "2026-01-17T00:00:00Z",
+    "sources_used": ["open_fixture_library", "vendor_pages"],
+    "led_panels": [
+      {
+        "brand": "Generic Premium",
+        "model": "P3.9 Indoor",
+        "pixel_pitch_mm": 3.9,
+        "wattage_per_pixel_ma": 600,
+        "notes": "High-resolution indoor panel for close viewing",
+        "reference": "generic"
+      },
+      {
+        "brand": "Generic Standard",
+        "model": "P6 Outdoor",
+        "pixel_pitch_mm": 6.0,
+        "wattage_per_pixel_ma": 450,
+        "notes": "Balanced outdoor panel for mid-distance",
+        "reference": "generic"
+      },
+      {
+        "brand": "Generic Economy",
+        "model": "P10 Outdoor",
+        "pixel_pitch_mm": 10.0,
+        "wattage_per_pixel_ma": 300,
+        "notes": "Cost-effective large-scale display",
+        "reference": "generic"
+      }
+    ],
+    "fixtures": [
+      {
+        "manufacturer": "American DJ",
+        "name": "Mega TRIPAR Profile",
+        "category": "PAR",
+        "channels": 5,
+        "source": "open_fixture_library",
+        "link": "https://open-fixture-library.org/american-dj/mega-tripar-profile"
+      },
+      {
+        "manufacturer": "Laserworld",
+        "name": "EL-400RGB MK2",
+        "category": "Laser",
+        "channels": 7,
+        "source": "open_fixture_library",
+        "link": "https://open-fixture-library.org/laserworld/el-400rgb-mk2"
+      }
+    ]
+  },
+
+  "automation_plan": {
+    "etl_pipeline": [
+      "Fetch OFL JSON (bulk download)",
+      "Normalize fixtures to internal models",
+      "Curate LED panel specs from vendor pages/CSV",
+      "Write to assets/data/device_catalog.json",
+      "Load in app via DeviceCatalogService and expose via Riverpod"
+    ],
+    "update_frequency_days": 30,
+    "manual_review_required": true
+  },
+
   "architectural_decisions": {
     "why_no_providers_in_demo": "Providers require complex backend initialization (Supabase, Hive, Auth). Demo simplified to show UI only.",
     "why_web_server_not_chrome": "User explicit constraint: wants Firefox only, minimal XCode overhead",

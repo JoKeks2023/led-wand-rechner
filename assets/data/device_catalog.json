@@ -1,0 +1,64 @@
+{
+  "sources": {
+    "fixtures": {
+      "open_fixture_library": {
+        "url": "https://open-fixture-library.org/",
+        "download": "https://open-fixture-library.org/download.ofl"
+      }
+    },
+    "led_panels": {
+      "vendors": [
+        { "name": "ROE Visual", "url": "https://www.roevisual.com/products/led-panels" },
+        { "name": "Absen", "url": "https://www.absen.com/products" },
+        { "name": "Unilumin", "url": "https://www.unilumin.com/products.html" }
+      ]
+    }
+  },
+  "catalog": {
+    "led_panels": [
+      {
+        "brand": "Generic Premium",
+        "model": "P3.9 Indoor",
+        "pixel_pitch_mm": 3.9,
+        "wattage_per_pixel_ma": 600,
+        "notes": "High-resolution indoor panel for close viewing",
+        "reference": "generic"
+      },
+      {
+        "brand": "Generic Standard",
+        "model": "P6 Outdoor",
+        "pixel_pitch_mm": 6.0,
+        "wattage_per_pixel_ma": 450,
+        "notes": "Balanced outdoor panel for mid-distance",
+        "reference": "generic"
+      },
+      {
+        "brand": "Generic Economy",
+        "model": "P10 Outdoor",
+        "pixel_pitch_mm": 10.0,
+        "wattage_per_pixel_ma": 300,
+        "notes": "Cost-effective large-scale display",
+        "reference": "generic"
+      }
+    ],
+    "fixtures": [
+      {
+        "manufacturer": "American DJ",
+        "name": "Mega TRIPAR Profile",
+        "category": "PAR",
+        "channels": 5,
+        "source": "open_fixture_library",
+        "link": "https://open-fixture-library.org/american-dj/mega-tripar-profile"
+      },
+      {
+        "manufacturer": "Laserworld",
+        "name": "EL-400RGB MK2",
+        "category": "Laser",
+        "channels": 7,
+        "source": "open_fixture_library",
+        "link": "https://open-fixture-library.org/laserworld/el-400rgb-mk2"
+      }
+    ]
+  },
+  "last_update": "2026-01-17T00:00:00Z"
+}

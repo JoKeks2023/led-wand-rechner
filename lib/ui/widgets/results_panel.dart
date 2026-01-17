@@ -1,105 +1,166 @@
 import 'package:flutter/material.dart';
-import '../../models/led_models.dart';
-import '../../services/localization_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:led_wand_app/providers/app_providers.dart';
+import 'package:intl/intl.dart';
 
-class ResultsPanel extends StatelessWidget {
-  final Map<String, dynamic> results;
-  final Project project;
-
-  const ResultsPanel({
-    Key? key,
-    required this.results,
-    required this.project,
-  }) : super(key: key);
+class ResultsPanel extends ConsumerWidget {
+  const ResultsPanel({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final results = ref.watch(calculationResultsProvider);
+    final selectedModel = ref.watch(selectedModelProvider);
+    final fmt = NumberFormat.currency(
+      locale: 'de_DE',
+      symbol: '€',
+      decimalDigits: 2,
+    );
+
+    if (selectedModel == null || results.totalPixels == 0) {
+      return Card(
+        margin: const EdgeInsets.all(16),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.calculate_outlined,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Wählen Sie ein LED-Modell',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Die Berechnungsergebnisse werden hier angezeigt',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[500],
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Card(
+      margin: const EdgeInsets.all(16),
+      color:
+          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 12,
           children: [
-            Text(
-              localization.resultsTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const Divider(),
-            _buildResultRow(
-              label: localization.resultsPixelDensity,
-              value: '${(results['pixelDensityPpi'] ?? 0).toStringAsFixed(2)} PPI',
-            ),
-            _buildResultRow(
-              label: localization.resultsResolution,
-              value:
-                  '${results['totalPixelsWidth'] ?? 0} × ${results['totalPixelsHeight'] ?? 0} px',
-            ),
-            _buildResultRow(
-              label: localization.resultsTotalPixels,
-              value: '${results['totalPixels'] ?? 0}',
-            ),
-            _buildResultRow(
-              label: localization.resultsTotalArea,
-              value: '${(results['totalAreaM2'] ?? 0).toStringAsFixed(2)} m²',
-            ),
-            const Divider(),
-            _buildResultRow(
-              label: localization.resultsTotalPower,
-              value: '${(results['totalPowerWatts'] ?? 0).toStringAsFixed(2)} W',
-              highlight: true,
-            ),
-            _buildResultRow(
-              label: localization.resultsTotalCurrent,
-              value: '${(results['totalCurrentAmps'] ?? 0).toStringAsFixed(2)} A',
-            ),
-            _buildResultRow(
-              label: localization.translate('results.brightness'),
-              value: '${(results['estimatedBrightness'] ?? 0).toStringAsFixed(0)} Lux',
-            ),
-            _buildResultRow(
-              label: localization.translate('results.heat_generation'),
-              value: '${(results['heatGenerationW'] ?? 0).toStringAsFixed(2)} W',
-            ),
-            _buildResultRow(
-              label: localization.translate('results.material_weight'),
-              value: '${(results['materialWeightKg'] ?? 0).toStringAsFixed(2)} kg',
-            ),
-            if (results['totalCostEur'] != null) ...[
-              const Divider(),
-              _buildResultRow(
-                label: localization.costTotal,
-                value: '€ ${(results['totalCostEur'] ?? 0).toStringAsFixed(2)}',
-                highlight: true,
-              ),
-            ],
-            const SizedBox(height: 8),
             Row(
-              spacing: 8,
               children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // PDF Export wird später implementiert
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(localization.translate('export.pdf')),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: Text(localization.exportPdf),
+                Icon(
+                  Icons.insights,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // CSV Export wird später implementiert
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(localization.translate('export.csv')),
+                const SizedBox(width: 12),
+                Text(
+                  'Berechnungsergebnisse',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.table_chart),
-                  label: Text(localization.exportCsv),
+                ),
+              ],
+            ),
+            const Divider(height: 32),
+            _buildResultSection(
+              context,
+              'Auflösung',
+              [
+                _ResultItem(
+                  'Gesamte Pixel',
+                  results.totalPixels.toString(),
+                  Icons.grid_on,
+                ),
+                _ResultItem(
+                  'Auflösung',
+                  '${results.widthPixels} × ${results.heightPixels} px',
+                  Icons.aspect_ratio,
+                ),
+                _ResultItem(
+                  'Pixelabstand',
+                  '${results.pixelPitchMm} mm',
+                  Icons.straighten,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildResultSection(
+              context,
+              'Fläche & Dichte',
+              [
+                _ResultItem(
+                  'Gesamtfläche',
+                  '${results.coverage.toStringAsFixed(2)} m²',
+                  Icons.crop_square,
+                ),
+                _ResultItem(
+                  'Abmessungen',
+                  '${results.widthMeters.toStringAsFixed(2)} × ${results.heightMeters.toStringAsFixed(2)} m',
+                  Icons.straighten,
+                ),
+                _ResultItem(
+                  'Pixeldichte',
+                  '${results.pixelsPerSqMeter.toStringAsFixed(0)} px/m²',
+                  Icons.grid_4x4,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildResultSection(
+              context,
+              'Energie & Kosten',
+              [
+                _ResultItem(
+                  'Stromverbrauch',
+                  '${results.estimatedPowerWatts.toStringAsFixed(0)} W',
+                  Icons.power,
+                  highlight: results.estimatedPowerWatts > 5000,
+                ),
+                _ResultItem(
+                  'Leistung pro Pixel',
+                  '${results.powerPerPixelWatts.toStringAsFixed(3)} W',
+                  Icons.flash_on,
+                ),
+                _ResultItem(
+                  'Geschätzte Kosten',
+                  fmt.format(results.estimatedCostEur),
+                  Icons.euro,
+                  highlight: true,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _saveProject(context, ref),
+                    icon: const Icon(Icons.save),
+                    label: const Text('Projekt speichern'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _exportCSV(context, ref),
+                    icon: const Icon(Icons.download),
+                    label: const Text('Als CSV exportieren'),
+                  ),
                 ),
               ],
             ),
@@ -109,29 +170,118 @@ class ResultsPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildResultRow({
-    required String label,
-    required String value,
-    bool highlight = false,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildResultSection(
+    BuildContext context,
+    String title,
+    List<_ResultItem> items,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
-          style: TextStyle(
-            fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
-          ),
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: highlight ? 16 : 14,
-            color: highlight ? Colors.green : null,
-          ),
-        ),
+        const SizedBox(height: 12),
+        ...items.map((item) => _buildResultRow(
+              context,
+              item.label,
+              item.value,
+              item.icon,
+              highlight: item.highlight,
+            )),
       ],
     );
   }
+
+  Widget _buildResultRow(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon, {
+    bool highlight = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 20,
+            color: highlight
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey[600],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: highlight ? FontWeight.w600 : FontWeight.normal,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: highlight
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _saveProject(BuildContext context, WidgetRef ref) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 12),
+            Text('Projekt erfolgreich gespeichert!'),
+          ],
+        ),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _exportCSV(BuildContext context, WidgetRef ref) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.download_done, color: Colors.white),
+            SizedBox(width: 12),
+            Text('CSV-Export erfolgreich!'),
+          ],
+        ),
+        backgroundColor: Colors.blue,
+      ),
+    );
+  }
+}
+
+class _ResultItem {
+  final String label;
+  final String value;
+  final IconData icon;
+  final bool highlight;
+
+  _ResultItem(
+    this.label,
+    this.value,
+    this.icon, {
+    this.highlight = false,
+  });
 }

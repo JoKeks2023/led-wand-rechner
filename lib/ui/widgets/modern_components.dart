@@ -10,14 +10,14 @@ class ModernCard extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   const ModernCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.onTap,
     this.elevation = 2,
     this.backgroundColor,
     this.borderRadius,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,14 +46,14 @@ class ModernButton extends StatelessWidget {
   final double? width;
 
   const ModernButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
     this.icon,
     this.isLoading = false,
     this.variant = ButtonVariant.primary,
     this.width,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +131,7 @@ class ModernInput extends StatelessWidget {
   final bool obscureText;
 
   const ModernInput({
-    Key? key,
+    super.key,
     required this.label,
     this.hint,
     this.controller,
@@ -141,7 +141,7 @@ class ModernInput extends StatelessWidget {
     this.validator,
     this.onChanged,
     this.obscureText = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -164,9 +164,7 @@ class ModernInput extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-            suffixIcon: obscureText
-                ? Icon(Icons.visibility)
-                : null,
+            suffixIcon: obscureText ? Icon(Icons.visibility) : null,
           ),
         ),
       ],
@@ -181,12 +179,12 @@ class ModernSwitch extends StatelessWidget {
   final String? description;
 
   const ModernSwitch({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.onChanged,
     this.description,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -222,10 +220,10 @@ class ModernDivider extends StatelessWidget {
   final EdgeInsets padding;
 
   const ModernDivider({
-    Key? key,
+    super.key,
     this.label,
     this.padding = const EdgeInsets.symmetric(vertical: 16),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -271,11 +269,11 @@ class LoadingOverlay extends StatelessWidget {
   final String? message;
 
   const LoadingOverlay({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.child,
     this.message,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +282,7 @@ class LoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Container(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

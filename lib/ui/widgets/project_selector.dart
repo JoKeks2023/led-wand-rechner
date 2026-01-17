@@ -9,12 +9,12 @@ class ProjectSelector extends StatelessWidget {
   final VoidCallback onNewProject;
 
   const ProjectSelector({
-    Key? key,
+    super.key,
     required this.currentProject,
     required this.projects,
     required this.onProjectSelected,
     required this.onNewProject,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

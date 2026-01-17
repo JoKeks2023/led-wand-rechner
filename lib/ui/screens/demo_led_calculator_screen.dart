@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 class DemoLEDCalculatorScreen extends StatefulWidget {
-  const DemoLEDCalculatorScreen({Key? key}) : super(key: key);
+  const DemoLEDCalculatorScreen({super.key});
 
   @override
   State<DemoLEDCalculatorScreen> createState() =>

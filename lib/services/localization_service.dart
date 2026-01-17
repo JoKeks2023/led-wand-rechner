@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class LocalizationService {
@@ -28,7 +28,7 @@ class LocalizationService {
         await rootBundle.loadString('assets/i18n/en.json'),
       );
     } catch (e) {
-      print('Error loading localization: $e');
+      debugPrint('Error loading localization: $e');
       _deLocalization = {};
       _enLocalization = {};
     }
@@ -63,7 +63,7 @@ class LocalizationService {
 
       return value?.toString() ?? key;
     } catch (e) {
-      print('Translation error for key: $key');
+      debugPrint('Translation error for key: $key');
       return key;
     }
   }

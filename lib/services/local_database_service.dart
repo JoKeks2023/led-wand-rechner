@@ -3,7 +3,8 @@ import '../models/led_models.dart';
 import 'hive_adapters.dart';
 
 class LocalDatabaseService {
-  static final LocalDatabaseService _instance = LocalDatabaseService._internal();
+  static final LocalDatabaseService _instance =
+      LocalDatabaseService._internal();
 
   factory LocalDatabaseService() {
     return _instance;
@@ -20,14 +21,13 @@ class LocalDatabaseService {
 
   Future<void> initialize() async {
     await Hive.initFlutter();
-    
+
     // Register Adapters
     Hive.registerAdapter(LEDBrandAdapter());
     Hive.registerAdapter(LEDModelAdapter());
     Hive.registerAdapter(ModelVariantAdapter());
     Hive.registerAdapter(ProjectAdapter());
     Hive.registerAdapter(CustomModelAdapter());
-    Hive.registerAdapter(LEDCalculationResultsAdapter());
 
     // Open Boxes
     _brandBox = await Hive.openBox<LEDBrand>(ledBrandsBoxName);
@@ -71,9 +71,7 @@ class LocalDatabaseService {
   LEDModel? getModel(String id) => _modelBox.get(id);
 
   List<LEDModel> getModelsByBrand(String brandId) {
-    return _modelBox.values
-        .where((model) => model.brandId == brandId)
-        .toList();
+    return _modelBox.values.where((model) => model.brandId == brandId).toList();
   }
 
   List<LEDModel> getAllModels() => _modelBox.values.toList();
@@ -165,7 +163,8 @@ class LocalDatabaseService {
   }
 
   // ========== SYNC METADATA ==========
-  Future<void> saveSyncMetadata(String entityId, String entityType, Map<String, dynamic> metadata) async {
+  Future<void> saveSyncMetadata(
+      String entityId, String entityType, Map<String, dynamic> metadata) async {
     final key = '${entityType}_$entityId';
     await _syncMetadataBox.put(key, metadata);
   }
@@ -196,7 +195,7 @@ class LocalDatabaseService {
     for (var project in userProjects) {
       await deleteProject(project.id);
     }
-    
+
     // Delete user custom models
     final userCustomModels = getCustomModelsByUser(userId);
     for (var model in userCustomModels) {

@@ -145,39 +145,3 @@ Map<String, dynamic> _$ProjectToJson(Project instance) => <String, dynamic>{
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };
-
-LEDCalculationResults _$LEDCalculationResultsFromJson(
-        Map<String, dynamic> json) =>
-    LEDCalculationResults(
-      pixelDensityPpi: (json['pixelDensityPpi'] as num).toDouble(),
-      totalPixelsWidth: (json['totalPixelsWidth'] as num).toInt(),
-      totalPixelsHeight: (json['totalPixelsHeight'] as num).toInt(),
-      totalPixels: (json['totalPixels'] as num).toInt(),
-      totalAreaM2: (json['totalAreaM2'] as num).toDouble(),
-      totalPowerWatts: (json['totalPowerWatts'] as num).toDouble(),
-      totalCurrentAmps: (json['totalCurrentAmps'] as num).toDouble(),
-      estimatedBrightness: (json['estimatedBrightness'] as num?)?.toDouble(),
-      heatGenerationW: (json['heatGenerationW'] as num?)?.toDouble(),
-      materialWeightKg: (json['materialWeightKg'] as num?)?.toDouble(),
-      totalCostEur: (json['totalCostEur'] as num?)?.toDouble(),
-      calculatedAt: json['calculatedAt'] == null
-          ? null
-          : DateTime.parse(json['calculatedAt'] as String),
-    );
-
-Map<String, dynamic> _$LEDCalculationResultsToJson(
-        LEDCalculationResults instance) =>
-    <String, dynamic>{
-      'pixelDensityPpi': instance.pixelDensityPpi,
-      'totalPixelsWidth': instance.totalPixelsWidth,
-      'totalPixelsHeight': instance.totalPixelsHeight,
-      'totalPixels': instance.totalPixels,
-      'totalAreaM2': instance.totalAreaM2,
-      'totalPowerWatts': instance.totalPowerWatts,
-      'totalCurrentAmps': instance.totalCurrentAmps,
-      'estimatedBrightness': instance.estimatedBrightness,
-      'heatGenerationW': instance.heatGenerationW,
-      'materialWeightKg': instance.materialWeightKg,
-      'totalCostEur': instance.totalCostEur,
-      'calculatedAt': instance.calculatedAt.toIso8601String(),
-    };

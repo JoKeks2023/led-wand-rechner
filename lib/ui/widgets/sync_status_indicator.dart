@@ -5,9 +5,9 @@ class SyncStatusIndicator extends StatelessWidget {
   final bool isOnline;
 
   const SyncStatusIndicator({
-    Key? key,
+    super.key,
     required this.isOnline,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

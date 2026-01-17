@@ -1,389 +1,423 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../models/dmx_models.dart';
-import '../../providers/app_providers.dart';
-import '../../services/localization_service.dart';
-import '../theme/app_colors.dart';
-import '../widgets/modern_components.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:led_wand_app/models/led_models.dart';
+import 'package:led_wand_app/providers/app_providers.dart';
+import 'package:led_wand_app/services/led_calculation_service.dart';
+import 'dart:math' as math;
 
-class StageVisualizerScreen extends StatefulWidget {
-  const StageVisualizerScreen({Key? key}) : super(key: key);
+class StageVisualizerScreen extends ConsumerStatefulWidget {
+  const StageVisualizerScreen({super.key});
 
   @override
-  State<StageVisualizerScreen> createState() => _StageVisualizerScreenState();
+  ConsumerState<StageVisualizerScreen> createState() =>
+      _StageVisualizerScreenState();
 }
 
-class _StageVisualizerScreenState extends State<StageVisualizerScreen> {
-  late TransformationController _transformationController;
-  double _zoomLevel = 1.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _transformationController = TransformationController();
-  }
-
-  @override
-  void dispose() {
-    _transformationController.dispose();
-    super.dispose();
-  }
+class _StageVisualizerScreenState extends ConsumerState<StageVisualizerScreen> {
+  double _rotationX = -0.3;
+  double _rotationY = 0.0;
+  double _zoom = 1.0;
 
   @override
   Widget build(BuildContext context) {
+    final results = ref.watch(calculationResultsProvider);
+    final selectedModel = ref.watch(selectedModelProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(localization.translate('stage.visualizer')),
+        title: const Text('Stage Visualizer'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.zoom_in),
-            onPressed: () => _zoom(1.2),
-            tooltip: localization.translate('stage.zoom_in'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.zoom_out),
-            onPressed: () => _zoom(0.8),
-            tooltip: localization.translate('stage.zoom_out'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.fit_screen),
-            onPressed: () => _resetZoom(),
-            tooltip: localization.translate('stage.fit_screen'),
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Zurücksetzen',
+            onPressed: () {
+              setState(() {
+                _rotationX = -0.3;
+                _rotationY = 0.0;
+                _zoom = 1.0;
+              });
+            },
           ),
         ],
       ),
-      body: Consumer3<DMXProfilesProvider, DMXServiceProvider,
-          DMXPreferencesProvider>(
-        builder: (context, profilesProvider, dmxService, prefsProvider, _) {
-          final selectedProfile = profilesProvider.currentProfile;
-
-          if (selectedProfile == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.image_not_supported_outlined,
-                    size: 64,
-                    color: AppColors.neutral400,
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    localization.translate('stage.no_profile_selected'),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return Stack(
-            children: [
-              // Main Canvas Area
-              InteractiveViewer(
-                transformationController: _transformationController,
-                minScale: 0.5,
-                maxScale: 5.0,
-                onInteractionEnd: (_) {
-                  setState(() {});
-                },
-                child: CustomPaint(
-                  painter: StagePainter(
-                    profile: selectedProfile,
-                    preferences: prefsProvider.preferences,
-                    zoomLevel: _zoomLevel,
-                  ),
-                  size: Size.infinite,
-                ),
-              ),
-
-              // Bottom Controls Panel
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: _VisualizerControlPanel(
-                  profile: selectedProfile,
-                  zoomLevel: _zoomLevel,
-                ),
-              ),
-
-              // Top Info Panel
-              Positioned(
-                top: 0,
-                left: 16,
-                right: 16,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: ModernCard(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              selectedProfile.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '${selectedProfile.patches.length} Patches • ${_countFixtures(selectedProfile)} Fixtures',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(color: AppColors.neutral600),
-                            ),
-                          ],
-                        ),
-                        Chip(
-                          label: Text(
-                            '${(_zoomLevel * 100).toStringAsFixed(0)}%',
-                          ),
-                          backgroundColor: AppColors.primary.withOpacity(0.2),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+      body: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Container(
+              color: Colors.grey[900],
+              child: selectedModel == null || results.totalPixels == 0
+                  ? _buildEmptyState()
+                  : _build3DVisualization(results),
+            ),
+          ),
+          Expanded(
+            child: _buildControlPanel(results, selectedModel),
+          ),
+        ],
       ),
     );
   }
 
-  void _zoom(double factor) {
-    setState(() {
-      _zoomLevel *= factor;
-      _zoomLevel = _zoomLevel.clamp(0.5, 5.0);
-    });
-    _transformationController.value = Matrix4.identity()..scale(_zoomLevel);
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.view_in_ar_outlined,
+            size: 80,
+            color: Colors.grey[600],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Keine LED-Konfiguration ausgewählt',
+            style: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Wählen Sie ein LED-Modell im Rechner-Tab',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  void _resetZoom() {
-    setState(() {
-      _zoomLevel = 1.0;
-    });
-    _transformationController.value = Matrix4.identity();
+  Widget _build3DVisualization(LEDCalculationResults results) {
+    return GestureDetector(
+      onPanUpdate: (details) {
+        setState(() {
+          _rotationY += details.delta.dx * 0.01;
+          _rotationX += details.delta.dy * 0.01;
+          _rotationX = _rotationX.clamp(-math.pi / 2, math.pi / 2);
+        });
+      },
+      child: CustomPaint(
+        painter: _LEDWall3DPainter(
+          rotationX: _rotationX,
+          rotationY: _rotationY,
+          zoom: _zoom,
+          widthPixels: results.widthPixels,
+          heightPixels: results.heightPixels,
+          widthMeters: results.widthMeters,
+          heightMeters: results.heightMeters,
+        ),
+        child: Container(),
+      ),
+    );
   }
 
-  int _countFixtures(DMXProfile profile) {
-    int count = 0;
-    for (var patch in profile.patches) {
-      count += patch.fixtures.length;
-    }
-    return count;
+  Widget _buildControlPanel(
+      LEDCalculationResults results, LEDModel? selectedModel) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.straighten,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Ansicht anpassen',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              const Icon(Icons.zoom_out, size: 20),
+              Expanded(
+                child: Slider(
+                  value: _zoom,
+                  min: 0.5,
+                  max: 2.0,
+                  onChanged: (value) {
+                    setState(() {
+                      _zoom = value;
+                    });
+                  },
+                ),
+              ),
+              const Icon(Icons.zoom_in, size: 20),
+            ],
+          ),
+          if (selectedModel != null && results.totalPixels > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildInfoChip(
+                    Icons.aspect_ratio,
+                    '${results.widthPixels}×${results.heightPixels}',
+                  ),
+                  _buildInfoChip(
+                    Icons.straighten,
+                    '${results.widthMeters.toStringAsFixed(1)}×${results.heightMeters.toStringAsFixed(1)} m',
+                  ),
+                  _buildInfoChip(
+                    Icons.grid_on,
+                    '${results.totalPixels} px',
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context)
+            .colorScheme
+            .primaryContainer
+            .withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-class StagePainter extends CustomPainter {
-  final DMXProfile profile;
-  final DMXPreferences preferences;
-  final double zoomLevel;
+class _LEDWall3DPainter extends CustomPainter {
+  final double rotationX;
+  final double rotationY;
+  final double zoom;
+  final int widthPixels;
+  final int heightPixels;
+  final double widthMeters;
+  final double heightMeters;
 
-  StagePainter({
-    required this.profile,
-    required this.preferences,
-    this.zoomLevel = 1.0,
+  _LEDWall3DPainter({
+    required this.rotationX,
+    required this.rotationY,
+    required this.zoom,
+    required this.widthPixels,
+    required this.heightPixels,
+    required this.widthMeters,
+    required this.heightMeters,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final stageBg = Paint()
-      ..color = AppColors.neutral900.withOpacity(0.5)
-      ..style = PaintingStyle.fill;
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
 
-    final stageBorder = Paint()
-      ..color = AppColors.primary.withOpacity(0.5)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+    // Draw grid floor
+    _drawGrid(canvas, size, centerX, centerY);
 
-    // Draw stage background
-    canvas.drawRect(
-      Rect.fromLTWH(50, 50, size.width - 100, size.height - 150),
-      stageBg,
-    );
+    // Draw LED wall
+    _drawLEDWall(canvas, size, centerX, centerY);
 
-    // Draw stage border
-    canvas.drawRect(
-      Rect.fromLTWH(50, 50, size.width - 100, size.height - 150),
-      stageBorder,
-    );
-
-    // Draw grid if enabled
-    if (preferences.stage.showGrid ?? true) {
-      _drawGrid(canvas, size);
-    }
-
-    // Draw fixtures
-    final fixtureRadius = 8.0 * zoomLevel;
-    final fixturePaint = Paint()
-      ..color = AppColors.secondary
-      ..style = PaintingStyle.fill;
-
-    int fixtureIndex = 0;
-    for (final patch in profile.patches) {
-      for (final fixture in patch.fixtures) {
-        final x = 100 + (fixtureIndex % 10) * 50;
-        final y = 100 + (fixtureIndex ~/ 10) * 50;
-        canvas.drawCircle(Offset(x, y), fixtureRadius, fixturePaint);
-
-        // Draw label if enabled
-        if (preferences.stage.showLabels ?? true) {
-          _drawFixtureLabel(
-            canvas,
-            fixture,
-            Offset(x, y),
-          );
-        }
-
-        fixtureIndex++;
-      }
-    }
-
-    // Draw intensity indicator if enabled
-    if (preferences.stage.showIntensity ?? true) {
-      _drawIntensityIndicators(canvas, size, profile);
-    }
+    // Draw labels
+    _drawLabels(canvas, size, centerX, centerY);
   }
 
-  void _drawGrid(Canvas canvas, Size size) {
-    final gridPaint = Paint()
-      ..color = AppColors.neutral700.withOpacity(0.2)
+  void _drawGrid(Canvas canvas, Size size, double centerX, double centerY) {
+    final paint = Paint()
+      ..color = Colors.grey[800]!
       ..strokeWidth = 1;
 
-    const gridSpacing = 50;
-    final startX = 50.0;
-    final startY = 50.0;
-    final endX = size.width - 50;
-    final endY = size.height - 100;
+    const gridSize = 10;
+    const gridSpacing = 30.0;
 
-    // Vertical lines
-    for (double x = startX; x <= endX; x += gridSpacing) {
-      canvas.drawLine(Offset(x, startY), Offset(x, endY), gridPaint);
-    }
-
-    // Horizontal lines
-    for (double y = startY; y <= endY; y += gridSpacing) {
-      canvas.drawLine(Offset(startX, y), Offset(endX, y), gridPaint);
+    for (int i = -gridSize; i <= gridSize; i++) {
+      final offset = i * gridSpacing;
+      // Horizontal lines
+      canvas.drawLine(
+        Offset(centerX - gridSize * gridSpacing, centerY + offset + 100),
+        Offset(centerX + gridSize * gridSpacing, centerY + offset + 100),
+        paint,
+      );
+      // Vertical lines
+      canvas.drawLine(
+        Offset(centerX + offset, centerY - gridSize * gridSpacing + 100),
+        Offset(centerX + offset, centerY + gridSize * gridSpacing + 100),
+        paint,
+      );
     }
   }
 
-  void _drawFixtureLabel(
-    Canvas canvas,
-    Fixture fixture,
-    Offset position,
-  ) {
+  void _drawLEDWall(Canvas canvas, Size size, double centerX, double centerY) {
+    final wallWidth = math.min(size.width * 0.6, 400.0) * zoom;
+    final aspectRatio = heightMeters / widthMeters;
+    final wallHeight = wallWidth * aspectRatio;
+
+    // Transform for 3D rotation
+    final cosX = math.cos(rotationX);
+    final sinX = math.sin(rotationX);
+    final cosY = math.cos(rotationY);
+    final sinY = math.sin(rotationY);
+
+    List<Offset> corners = [
+      Offset(-wallWidth / 2, -wallHeight / 2),
+      Offset(wallWidth / 2, -wallHeight / 2),
+      Offset(wallWidth / 2, wallHeight / 2),
+      Offset(-wallWidth / 2, wallHeight / 2),
+    ];
+
+    // Apply 3D transformation
+    final transformedCorners = corners.map((corner) {
+      double x = corner.dx;
+      double y = corner.dy;
+      double z = 0;
+
+      // Rotate around Y axis
+      double x1 = x * cosY - z * sinY;
+      double z1 = x * sinY + z * cosY;
+
+      // Rotate around X axis
+      double y2 = y * cosX - z1 * sinX;
+
+      return Offset(centerX + x1, centerY + y2);
+    }).toList();
+
+    // Draw wall
+    final wallPaint = Paint()
+      ..color = Colors.grey[850]!
+      ..style = PaintingStyle.fill;
+
+    final path = Path()
+      ..moveTo(transformedCorners[0].dx, transformedCorners[0].dy)
+      ..lineTo(transformedCorners[1].dx, transformedCorners[1].dy)
+      ..lineTo(transformedCorners[2].dx, transformedCorners[2].dy)
+      ..lineTo(transformedCorners[3].dx, transformedCorners[3].dy)
+      ..close();
+
+    canvas.drawPath(path, wallPaint);
+
+    // Draw border
+    final borderPaint = Paint()
+      ..color = Colors.blueAccent
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawPath(path, borderPaint);
+
+    // Draw pixel grid (simplified for performance)
+    final pixelPaint = Paint()
+      ..color = Colors.blue.withValues(alpha: 0.3)
+      ..strokeWidth = 1;
+
+    const maxGridLines = 20;
+    final gridStepW =
+        widthPixels > maxGridLines ? (widthPixels / maxGridLines).ceil() : 1;
+    final gridStepH =
+        heightPixels > maxGridLines ? (heightPixels / maxGridLines).ceil() : 1;
+
+    for (int i = 0; i <= widthPixels; i += gridStepW) {
+      final t = i / widthPixels;
+      final x1 = transformedCorners[0].dx +
+          (transformedCorners[1].dx - transformedCorners[0].dx) * t;
+      final y1 = transformedCorners[0].dy +
+          (transformedCorners[1].dy - transformedCorners[0].dy) * t;
+      final x2 = transformedCorners[3].dx +
+          (transformedCorners[2].dx - transformedCorners[3].dx) * t;
+      final y2 = transformedCorners[3].dy +
+          (transformedCorners[2].dy - transformedCorners[3].dy) * t;
+      canvas.drawLine(Offset(x1, y1), Offset(x2, y2), pixelPaint);
+    }
+
+    for (int i = 0; i <= heightPixels; i += gridStepH) {
+      final t = i / heightPixels;
+      final x1 = transformedCorners[0].dx +
+          (transformedCorners[3].dx - transformedCorners[0].dx) * t;
+      final y1 = transformedCorners[0].dy +
+          (transformedCorners[3].dy - transformedCorners[0].dy) * t;
+      final x2 = transformedCorners[1].dx +
+          (transformedCorners[2].dx - transformedCorners[1].dx) * t;
+      final y2 = transformedCorners[1].dy +
+          (transformedCorners[2].dy - transformedCorners[1].dy) * t;
+      canvas.drawLine(Offset(x1, y1), Offset(x2, y2), pixelPaint);
+    }
+  }
+
+  void _drawLabels(Canvas canvas, Size size, double centerX, double centerY) {
     final textPainter = TextPainter(
-      text: TextSpan(
-        text: fixture.name.substring(0, 1),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
       textDirection: TextDirection.ltr,
     );
 
+    // Title
+    textPainter.text = TextSpan(
+      text: 'LED Wand Visualisierung',
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+    );
     textPainter.layout();
-    textPainter.paint(
-      canvas,
-      Offset(
-        position.dx - textPainter.width / 2,
-        position.dy - textPainter.height / 2,
+    textPainter.paint(canvas, const Offset(20, 20));
+
+    // Dimensions
+    textPainter.text = TextSpan(
+      text:
+          '${widthMeters.toStringAsFixed(2)}m × ${heightMeters.toStringAsFixed(2)}m',
+      style: TextStyle(
+        color: Colors.grey[400],
+        fontSize: 14,
       ),
     );
-  }
+    textPainter.layout();
+    textPainter.paint(canvas, const Offset(20, 45));
 
-  void _drawIntensityIndicators(Canvas canvas, Size size, DMXProfile profile) {
-    // This would show intensity levels for active fixtures
-    // For now, we'll just draw a simple bar
-    final barHeight = 20.0;
-    final barPaint = Paint()
-      ..color = AppColors.secondary.withOpacity(0.3)
-      ..style = PaintingStyle.fill;
-
-    canvas.drawRect(
-      Rect.fromLTWH(50, size.height - 70, size.width - 100, barHeight),
-      barPaint,
+    // Resolution
+    textPainter.text = TextSpan(
+      text: '$widthPixels × $heightPixels Pixel',
+      style: TextStyle(
+        color: Colors.grey[400],
+        fontSize: 14,
+      ),
     );
+    textPainter.layout();
+    textPainter.paint(canvas, const Offset(20, 65));
   }
 
   @override
-  bool shouldRepaint(StagePainter oldDelegate) {
-    return oldDelegate.profile != profile ||
-        oldDelegate.zoomLevel != zoomLevel ||
-        oldDelegate.preferences != preferences;
-  }
-}
-
-class _VisualizerControlPanel extends StatelessWidget {
-  final DMXProfile profile;
-  final double zoomLevel;
-
-  const _VisualizerControlPanel({
-    required this.profile,
-    required this.zoomLevel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: Theme.of(context).colorScheme.outline,
-          ),
-        ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 12,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                localization.translate('stage.fixture_info'),
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              Chip(
-                label: Text('${_countAllFixtures(profile)} Total'),
-              ),
-            ],
-          ),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: profile.patches.map((patch) {
-              return Chip(
-                label: Text(
-                  '${patch.name}: ${patch.fixtures.length}',
-                ),
-                backgroundColor: AppColors.primary.withOpacity(0.2),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  int _countAllFixtures(DMXProfile profile) {
-    int count = 0;
-    for (var patch in profile.patches) {
-      count += patch.fixtures.length;
-    }
-    return count;
+  bool shouldRepaint(_LEDWall3DPainter oldDelegate) {
+    return oldDelegate.rotationX != rotationX ||
+        oldDelegate.rotationY != rotationY ||
+        oldDelegate.zoom != zoom ||
+        oldDelegate.widthPixels != widthPixels ||
+        oldDelegate.heightPixels != heightPixels;
   }
 }

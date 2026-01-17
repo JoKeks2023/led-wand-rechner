@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:led_wand_app/providers/app_providers.dart';
 import 'package:intl/intl.dart';
+import 'package:led_wand_app/models/led_models.dart';
+import 'package:led_wand_app/providers/app_providers.dart';
+import 'package:led_wand_app/services/led_calculation_service.dart';
 
 class LEDCalculatorScreen extends ConsumerStatefulWidget {
-  const LEDCalculatorScreen({Key? key}) : super(key: key);
+  const LEDCalculatorScreen({super.key});
 
   @override
   ConsumerState<LEDCalculatorScreen> createState() =>
@@ -221,7 +223,7 @@ class _LEDCalculatorScreenState extends ConsumerState<LEDCalculatorScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: selectedBrand?.id,
+              initialValue: selectedBrand?.id,
               hint: const Text('Hersteller wählen'),
               items: brands.map((brand) {
                 return DropdownMenuItem(
@@ -268,7 +270,7 @@ class _LEDCalculatorScreenState extends ConsumerState<LEDCalculatorScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: selectedModel?.id,
+                initialValue: selectedModel?.id,
                 hint: const Text('Modell wählen'),
                 items: modelsList.map((model) {
                   return DropdownMenuItem(
@@ -317,14 +319,14 @@ class _LEDCalculatorScreenState extends ConsumerState<LEDCalculatorScreen> {
                   ),
             ),
             const SizedBox(height: 16),
-            _buildResultRow('Gesamte Pixel:', '${results.totalPixels}'),
+            _buildResultRow('Gesamte Pixel:', results.totalPixels.toString()),
             _buildResultRow('Auflösung:',
                 '${results.widthPixels} x ${results.heightPixels}'),
             _buildResultRow('Pixelabstand:', '${results.pixelPitchMm} mm'),
             _buildResultRow(
                 'Fläche:', '${results.coverage.toStringAsFixed(2)} m²'),
             _buildResultRow(
-                'Pixel/m²:', '${results.pixelsPerSqMeter.toStringAsFixed(0)}'),
+                'Pixel/m²:', results.pixelsPerSqMeter.toStringAsFixed(0)),
             const Divider(height: 20),
             _buildResultRow(
               'Stromverbrauch:',
@@ -373,7 +375,6 @@ class _LEDCalculatorScreenState extends ConsumerState<LEDCalculatorScreen> {
   }
 
   void _saveAsProject(BuildContext context) {
-    final results = ref.read(calculationResultsProvider);
     final brand = ref.read(selectedBrandProvider);
     final model = ref.read(selectedModelProvider);
 

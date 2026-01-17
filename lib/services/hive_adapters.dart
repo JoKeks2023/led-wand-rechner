@@ -95,20 +95,3 @@ class CustomModelAdapter extends TypeAdapter<CustomModel> {
     writer.writeMap(obj.toJson());
   }
 }
-
-// Adapter für LEDCalculationResults
-@HiveType(typeId: 5)
-class LEDCalculationResultsAdapter extends TypeAdapter<LEDCalculationResults> {
-  @override
-  final int typeId = 5;
-
-  @override
-  LEDCalculationResults read(BinaryReader reader) {
-    return LEDCalculationResults.fromJson(Map<String, dynamic>.from(reader.readMap()));
-  }
-
-  @override
-  void write(BinaryWriter writer, LEDCalculationResults obj) {
-    writer.writeMap(obj.toJson());
-  }
-}

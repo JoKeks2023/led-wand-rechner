@@ -130,29 +130,3 @@ class CustomModelAdapterAdapter extends TypeAdapter<CustomModelAdapter> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
-
-class LEDCalculationResultsAdapterAdapter
-    extends TypeAdapter<LEDCalculationResultsAdapter> {
-  @override
-  final int typeId = 5;
-
-  @override
-  LEDCalculationResultsAdapter read(BinaryReader reader) {
-    return LEDCalculationResultsAdapter();
-  }
-
-  @override
-  void write(BinaryWriter writer, LEDCalculationResultsAdapter obj) {
-    writer.writeByte(0);
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is LEDCalculationResultsAdapterAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}

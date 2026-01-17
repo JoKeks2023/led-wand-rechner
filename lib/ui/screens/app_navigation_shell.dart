@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../theme/app_colors.dart';
-import 'led_calculator_screen.dart';
-import 'dmx_settings_screen.dart';
-import 'dmx_pult_screen.dart';
-import 'stage_visualizer_screen.dart';
+import 'package:led_wand_app/ui/theme/app_colors.dart';
+import 'package:led_wand_app/ui/screens/led_calculator_screen.dart';
+import 'package:led_wand_app/ui/screens/dmx_settings_screen.dart';
+import 'package:led_wand_app/ui/screens/stage_visualizer_screen.dart';
+import 'package:led_wand_app/ui/screens/device_catalog_screen.dart';
 
 class AppNavigationShell extends StatefulWidget {
-  const AppNavigationShell({Key? key}) : super(key: key);
+  const AppNavigationShell({super.key});
 
   @override
   State<AppNavigationShell> createState() => _AppNavigationShellState();
@@ -19,17 +18,21 @@ class _AppNavigationShellState extends State<AppNavigationShell> {
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_navigatorKeys[_currentIndex].currentState?.canPop() ?? false) {
+    final canPopCurrent =
+        _navigatorKeys[_currentIndex].currentState?.canPop() ?? false;
+
+    return PopScope(
+      canPop: !canPopCurrent,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (canPopCurrent) {
           _navigatorKeys[_currentIndex].currentState?.pop();
-          return false;
         }
-        return true;
       },
       child: Scaffold(
         body: IndexedStack(
@@ -62,6 +65,15 @@ class _AppNavigationShellState extends State<AppNavigationShell> {
                 );
               },
             ),
+            // Device Catalog
+            Navigator(
+              key: _navigatorKeys[3],
+              onGenerateRoute: (settings) {
+                return MaterialPageRoute(
+                  builder: (_) => const DeviceCatalogScreen(),
+                );
+              },
+            ),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -85,6 +97,10 @@ class _AppNavigationShellState extends State<AppNavigationShell> {
             BottomNavigationBarItem(
               icon: Icon(Icons.landscape),
               label: 'Bühne',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.inventory_2),
+              label: 'Katalog',
             ),
           ],
         ),
