@@ -23,229 +23,216 @@ class AppTheme {
         onError: Colors.white,
         surface: AppColors.surfaceLight,
         onSurface: AppColors.neutral900,
-        outline: AppColors.nimport 'package:flutter/material.dart';
-import 'app_colors.dart';
-
-class App,
-import 'app_colors.dart';
-
-class AppThdL
-class AppTheme {
-  stat Ap  static ThemeD      return ThemeData(
-      useMatry      useMaterial3: Co      brightness: Bright        colorSc,
-        scrolledUnder        primary: AppColors.primary,
-al        onPrimary: Colors.white,
- Te        primaryContaontSize: 20,
-        onPrimaryContainer: AppColors.primaryDar c        secondary: AppColors.secondary,
-        odT        onSecondary: Colors.white,
-   or      aceLight,
-        elevation:         onSecondaryContainer: AppColors.secondaryDarbo        tertiary: AppColors.tertiary,
-        onTerti          onTertiaryorationTheme: InputD        tertiaryContainer: AppCotr        onTertiaryContainer: AppColors.tertiaryDar          error: AppColors.error,
-        onError: Co:      rRadius.circular(12),
-             surface: AppColors.suSi        onSurface: AppColors.neutral900          outline: AppColors.nimport 'pacorimport 'app_colors.dart';
-
-class App,
-import 'app_colors.dart';
-
-cbo
-class App,
-import 'app_de(iolor: AppC
-class AppThdL
-class App   class AppTheoc  stat Ap  statli      useMatry      useMaterial3: Co      brigad        scrolledUnder        primary: AppColors.primary,
-al        onPrimar: al        onPrimary:           width: 2,
-          ),
-    Te        primaryContaontSize: 2in        onPrimaryContainer: AppColus        odT        onSecondary: Colors.white,
-   or      aceLight,
-        elevation:   or   or      aceLight,
-        elevation:     Ed        elevation: ho        onTerti          onTertiaryorationTheme: InputD        tertiaryCont.neutral600),
-        hintStyle: Tex        onError: Co:      rRadius.circular(12),
-             surface: AppColors.suSi        onSurface: AppColors.neutral900          outline: AppColors.nimport 'pacorimporlo             surface: AppColors.suSi        onwh
-class App,
-import 'app_colors.dart';
-
-cbo
-class App,
-import 'app_de(iolor: AppC
-class AppThdL
-class App   class AppTheoc  stat Ap  statli    adiimport 'arR
-cbo
-class App,
-import '      )import 'a  class AppThdL
-class App  
- class App     al        onPrimar: al        onPrimary:           width: 2,
-          ),
-    Te        primaryContaontSize: 2in        onPrimaryContainer: AppCole:          ),
-    Te        primaryContaontSize: 2in        in    Te     ge   or      aceLight,
-        elevation:   or   or      aceLight,
-        elevation:     Ed        elevation: ho       de        elevation: ),        elevation:     Ed        elevationxt        hintStyle: Tex        onError: Co:      rRadius.circular(12),
-             surface: AppColors.suSi        onSurface: AppColorg:             surface: AppColors.suSi        onSurface: AppColors.neu
- class App,
-import 'app_colors.dart';
-
-cbo
-class App,
-import 'app_de(iolor: AppC
-class AppThdL
-class App   class AppTheoc  stat Ap  statli    adiimport 'arR
-cbo
-class A RoundedRectangleB
-cbo
-class App,
-import 'adicl: BorderRadiuclass AppThdL
-class App  
- class),
-      cbo
-class App,
-import '      )import 'a  class AppThdL
-classppcoloimport ' l9class App  
- class App     al        oxt class Appr:          ),
-    Te        primaryContaontSize: 2in        onPrimaryContaiiu    Te  rRadi    Te        primaryContaontSize: 2in        in    Te     ge   or      ac     ),
-             elevation:   or   or      aceLight,
-        elevation:  neutral200,
-              elevation:     Ed        elevationti             surface: AppColors.suSi        onSurface: AppColorg:             surface: AppColors.suSi        onSurface: AppColors.neu
- class App,
-import 'app_colors.dart';
-
-cbo
-class App,
-   class App,
-import 'app_colors.dart';
-
-cbo
-class App,
-import 'app_de(iolor: AppC
-class AppThdL
-class App   class AppTheoc  stat Ap    import 'apy:
-cbo
-class.secondary,
-     cl oimport 'ay:class AppThdL
-class App  coclass App   ercbo
-class A RoundedRectangleB
-cbo
-class App,
-import 'adicl: Coclrscbo
-class App,
-impo      tcltiimport 'aolclass App  
- class),
-      cbo
-class Ars class),
-         cticlass Apinimport ' loclassppcoloimport ' l9class App  
- clata class App     al  tiaryLight,
-       Te        primaryContaontSize: 2in        onPris.             elevation:   or   or      aceLight,
-        elevation:  neutral200,
-              elevation:     Ed        elevationti             surface: Appou        elevation:  neutral200,
-              eCo              elevation:     E
-  class App,
-import 'app_colors.dart';
-
-cbo
-class App,
-   class App,
-import 'app_colors.dart';
-
-cbo
-class App,
-import 'app_de(iolor: AppC
-class AppThdL
-class App   class AppTheoc  stacenterTitle: f
-cbo
-class App,
-   classtylcl c   class Stimport 'app_  
-cbo
-class App,
-import ' foclWeimport 'atWclass AppThdL
-class App  orclass App   tecbo
-class.secondary,
-     cl oimport 'ay:class App           cl oimportors.surfaceDark,
+        outline: AppColors.neutral400,
+      ),
+      scaffoldBackgroundColor: AppColors.backgroundLight,
+      canvasColor: AppColors.backgroundLight,
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 4,
+        centerTitle: false,
+        titleTextStyle: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.surfaceLight,
         elevation: 2,
-        shape: RoundedRectancbo
-class App,
-import 'adecladimport 'aerclass App,
-impo      tc  impo        class),
-      cbo
-class Ars class),utDecoratioclass Ar           cticlasue clata class App     al  tiaryLight,
-              border: OutlineI       Te        primaryContaontSiz B        elevation:  neutral200,
-              elevation:     Ed        elevationti             surface:),              elevation:     EeI              eCo              elevation:     E
-  class App,
-import 'app_colors.dart';
-
-cbo
-class App,
-   c:   class App,
-import 'app_colors.dart';
-
-cbo
-clseimporer: Outl
-cbo
-class Apr(
-          bclde   class Boimport 'ap.cir
-cbo
-class App,
-import 'dercldeimport 'aorclass AppThdL
-class App  r:class App   eccbo
-class App,
-   classtylcl c   class Stimp         classt  cbo
-class App,
-import ' foclWeimport 'atric(himport ' : class App  orclass App     labelStyle: Tclass.secondary,
-     cl oimptr     cl oimport h        elevation: 2,
-        shape: Roundal500),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
-      el    edButtonTheme: Eleclass App,
-impoeData(
-        stimport 'aatimpo      tc  impo        class),
- roundColor: AppColors.primary,
-     class Areg              border: OutlineI       Te        primaryContaontSiz B        elevation:  neutti              elevation:     Ed        elevationti             surface:),              elevation:r(  class App,
-import 'app_colors.dart';
-
-cbo
-class App,
-   c:   class App,
-import 'app_colors.dart';
-
-cbo
-clseimporer: Outl
-cbo
-class Apr(
-          bclomimport 'app f
-cbo
-class App,
-   c:   s.sclon   c:   c  import 'app_colorBorderSide(color: AppColors.scloncbo
-class Apr(
-  pcldi          Ecbo
-nsets.symmetric(horizontal: 24, verticll:import 'd  class hape: RoundedRectangleBorder(
-    class App,
-   classtylcl c   ad   classtlaclass App,
-import ' foclWeimport 'atric(himpo textimport ' me     cl oimptr     cl oimport h        elevation: 2,
-        shape: Roundal500),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.neutral100,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.neutral300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.neutral300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: AppColors.primary,
+            width: 2,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        labelStyle: TextStyle(color: AppColors.neutral600),
+        hintStyle: TextStyle(color: AppColors.neutral500),
       ),
-      .s        shape: Roundal500)g: const EdgeInsets.symmetr      ),
-      el    edButl:      e  impoeData(
-        stimport 'aatimpo   em        s   roundColor: AppColors.primary,
-     class Areg      be     class Areg              b Aimport 'app_colors.dart';
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.primary),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.neutral100,
+        labelStyle: const TextStyle(color: AppColors.neutral900),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.neutral900,
+        contentTextStyle: const TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.neutral200,
+        thickness: 1,
+      ),
+    );
+  }
 
-cbo
-class App,
-   c:   class App,
-import 'app_colors.dart';
-
-cbo
-clseimporer: Outl
-cbo
-class Apr(
-          bclomimport 'app f
-cbo
-class App,
-   c:   s.sclon   c:   c  import 'app_colorl900,
-  
-cbo
-class App,
-   c:   const T   c:   ccoimport 'app_colte),
-        shape: RoundedRectclglcbo
-class Apr(
-   clor      ius: BorderRadius.circular(12),
-         c:   s  class Apr(
-  pcldi          Ecbo
-nsets.symmetric(horizontal: 24, verticll:impode  pcldi  a(nsets.symmetric(horiol    class A700,
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.dark(
+        primary: AppColors.primary,
+        onPrimary: Colors.white,
+        primaryContainer: AppColors.primaryDark,
+        onPrimaryContainer: AppColors.primaryLight,
+        secondary: AppColors.secondary,
+        onSecondary: Colors.white,
+        secondaryContainer: AppColors.secondaryDark,
+        onSecondaryContainer: AppColors.secondaryLight,
+        tertiary: AppColors.tertiary,
+        onTertiary: Colors.white,
+        tertiaryContainer: AppColors.tertiaryDark,
+        onTertiaryContainer: AppColors.tertiaryLight,
+        error: AppColors.error,
+        onError: Colors.white,
+        surface: AppColors.surfaceDark,
+        onSurface: AppColors.neutral100,
+        outline: AppColors.neutral600,
+      ),
+      scaffoldBackgroundColor: AppColors.backgroundDark,
+      canvasColor: AppColors.backgroundDark,
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.neutral800,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 4,
+        centerTitle: false,
+        titleTextStyle: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.surfaceDark,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.neutral800,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.neutral600),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.neutral600),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: AppColors.secondary,
+            width: 2,
+          ),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        labelStyle: TextStyle(color: AppColors.neutral300),
+        hintStyle: TextStyle(color: AppColors.neutral500),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.secondary,
+          side: const BorderSide(color: AppColors.secondary),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.secondary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.neutral700,
+        labelStyle: const TextStyle(color: AppColors.neutral100),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.neutral900,
+        contentTextStyle: const TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.neutral700,
         thickness: 1,
       ),
     );
